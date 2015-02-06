@@ -53,6 +53,8 @@ class ProjBinding (object) :
         self.projHome           = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local              = ProjLocal(self.pid)
         self.log                = ProjLog(self.pid)
+        self.pdfViewerCmd       = self.userConfig['System']['pdfViewerCommand']
+
 
         # Log messages for this module
         self.errorCodes     = {
@@ -64,8 +66,11 @@ class ProjBinding (object) :
             '0235' : ['ERR', 'Failed to complete proccessing on the [<<1>>] binding file.'],
             '0240' : ['LOG', 'Recorded [<<1>>] rendered pages in the [<<2>>] binding file.'],
             '0260' : ['ERR', 'PDF viewer failed with this error: [<<1>>]'],
+            '0265' : ['ERR', 'Rendered file not found: <<1>>'],
+            '0270' : ['WRN', 'PDF viewing is disabled.'],
             '0280' : ['ERR', 'GS PDF file merge failed with this error: [<<1>>]'],
             '0300' : ['MSG', 'File binding operation in process, please wait...']
+
         }
 
 
@@ -143,6 +148,7 @@ class ProjBinding (object) :
             else :
                 if shutil.copy(tempFile, bindFile) :
                     self.log.writeToLog(self.errorCodes['0220'], [tempFile,bindFile])
+
             # Direct to viewFile
             viewFile = bindFile
                 
@@ -152,20 +158,25 @@ class ProjBinding (object) :
             else :
                 viewFile = tempFile
 
-        # Build the viewer command (fall back to default if needed)
-        # FIXME: For now, we need to hard-code the manager name (usfm_Xetex)
-        pdfViewerCmd = self.projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand']
-        if not pdfViewerCmd :
-            pdfViewerCmd = self.userConfig['System']['pdfViewerCommand']
+        # Binding should have been successful, report it now
+        self.log.writeToLog(self.errorCodes['0230'], [viewFile])
 
-        pdfViewerCmd.append(viewFile)
-        # Run the XeTeX and collect the return code for analysis
-        try :
-            subprocess.Popen(pdfViewerCmd)
-            return True
-        except Exception as e :
-            # If we don't succeed, we should probably quite here
-            self.log.writeToLog(self.errorCodes['0260'], [str(e)])
+        # View the file
+        if os.path.isfile(viewFile) :
+            if not len(self.pdfViewerCmd[0]) == 0 :
+                # Add the file to the viewer command
+                self.pdfViewerCmd.append(viewFile)
+                # Run the viewer
+                try :
+                    subprocess.Popen(self.pdfViewerCmd)
+                    return True
+                except Exception as e :
+                    # If we don't succeed, we should probably quite here
+                    self.log.writeToLog(self.errorCodes['0260'], [str(e)])
+            else :
+                self.log.writeToLog(self.errorCodes['0270'])
+        else :
+            self.log.writeToLog(self.errorCodes['0265'], [self.tools.fName(viewFile)])
 
 
     def mergePdfFilesGs (self, sourceList) :

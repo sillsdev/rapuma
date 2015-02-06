@@ -747,7 +747,7 @@ class Xetex (Manager) :
 
         # Now view it
         if os.path.isfile(viewFile) :
-            if not len(self.pdfViewerCmd) == 0 :
+            if not len(self.pdfViewerCmd[0]) == 0 :
                 # Add the file to the viewer command
                 self.pdfViewerCmd.append(viewFile)
                 # Run the XeTeX and collect the return code for analysis

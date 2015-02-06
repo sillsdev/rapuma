@@ -93,6 +93,7 @@ class Pdftk (Manager) :
             '0000' : ['MSG', 'Messages for the pdftk module.'],
 
             '5010' : ['ERR', 'Subprocess failed with this error: <<1>>'],
+            '5020' : ['MSG', 'PDF merge was successful. Output = <<1>>'],
             '5200' : ['ERR', 'Rendered file not found: <<1>>'],
             '5210' : ['WRN', 'PDF viewing is disabled.'],
             '5720' : ['MSG', 'Saved rendered file to: [<<1>>]'],
@@ -235,31 +236,32 @@ class Pdftk (Manager) :
             if saveFile :
                 # If there was a saveFile, that will be the viewFile
                 viewFile = saveFile
+                self.log.writeToLog(self.errorCodes['5020'], [saveFile])
             else :
                 # The view file in this case is just temporary
                 if not os.path.isfile(viewFile) :
                     viewFile = self.local.gidPdfFile.replace(gid + '.pdf', gid + '-view.pdf')
                     shutil.copy(self.local.gidPdfFile, viewFile)
+                    self.log.writeToLog(self.errorCodes['5020'], [self.tools.fName(viewFile)])
 
-        # Now view it
-        if os.path.isfile(viewFile) :
-            if not len(self.pdfViewerCmd) == 0 :
-                # Add the file to the viewer command
-                self.pdfViewerCmd.append(viewFile)
-                # Run the XeTeX and collect the return code for analysis
-                try :
-                    subprocess.Popen(self.pdfViewerCmd)
-                    return True
-                except Exception as e :
-                    # If we don't succeed, we should probably quite here
-                    self.log.writeToLog(self.errorCodes['5010'], [str(e)])
+            if os.path.isfile(viewFile) :
+                if not len(self.pdfViewerCmd[0]) == 0 :
+                    # Add the file to the viewer command
+                    self.pdfViewerCmd.append(viewFile)
+                    # Run the XeTeX and collect the return code for analysis
+                    try :
+                        subprocess.Popen(self.pdfViewerCmd)
+                        return True
+                    except Exception as e :
+                        # If we don't succeed, we should probably quite here
+                        self.log.writeToLog(self.errorCodes['5010'], [str(e)])
+                else :
+                    self.log.writeToLog(self.errorCodes['5210'])
             else :
-                self.log.writeToLog(self.errorCodes['5210'])
-        else :
-            self.log.writeToLog(self.errorCodes['5200'], [self.tools.fName(viewFile)])
-            
-        # If we made it this far, return True
-        return True
+                self.log.writeToLog(self.errorCodes['5200'], [self.tools.fName(viewFile)])
+                
+            # If we made it this far, return True
+            return True
 
 
 

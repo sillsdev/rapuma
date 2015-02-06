@@ -663,7 +663,7 @@ class Tools (object) :
 
 
     def writeConfFile (self, config) :
-        '''Generic routin to write out to, or create a config file.'''
+        '''Generic routine to write out to, or create a config file.'''
 
 #        import pdb; pdb.set_trace()
 

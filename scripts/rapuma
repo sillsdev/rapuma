@@ -339,7 +339,7 @@ def userArguments (args) :
             elif sub == 'remove' :
                 ProjDelete().deleteProject(pid)
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
         elif cmd == 'share' :
             tools.terminal('\nSave the project to a virtural drive (cloud) to share with another user. Note only one user can work on the project at a time. \n')
             sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
@@ -356,6 +356,11 @@ def userArguments (args) :
         cid_list    = []            # A list of one or more cids
         source_list = []            # Gen: A list of files w/paths
         path        = ''
+        # Test the GID for use in component or group level commands
+        if cmd == 'component' or cmd == 'group' :
+            if not ProjSetup(sysConfig, pid).isGroup(gid) :
+                if not sub == 'add' :
+                    sys.exit('\nERROR: Group ID [' + path + '] is not valid. Process halting.\n')
         # For some processes we need to have the cType
         if not cType :
             cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
@@ -418,7 +423,7 @@ def userArguments (args) :
                 if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                     ProjCommander(pid).removeScripts()
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
         # Work with components
         elif cmd == 'component' :
             if sub == 'add' :
@@ -434,7 +439,7 @@ def userArguments (args) :
                 # Update one or more components in a group
                 ProjSetup(sysConfig, pid).updateComponents(gid, source_list)
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
 
 
     ##### ASSET
@@ -548,13 +553,14 @@ def userArguments (args) :
         canonGroups = ['OT', 'NT', 'BIBLE']
         cType       = ''
         # For some processes we need to have the cType
-        cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
+        if not cmd == 'project' :
+            cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
         # Clean up the CID list
         if cidList :
             if type(cidList) != list :
                 cidList = cidList.split()
-        # Test the GID
-        if cmd == 'component' :
+        # Test the GID for use in component or group level commands
+        if cmd == 'component' or cmd == 'group' :
             if not ProjSetup(sysConfig, pid).isGroup(gid) :
                 sys.exit('\nERROR: Group ID [' + path + '] is not valid. Process halting.\n')
         # Check source path if there is one
@@ -572,6 +578,7 @@ def userArguments (args) :
                 sys.exit('\nERROR: The path given [' + ovrdPath + '] given is not valid. Process halted!\n')
 
         # Begin processing commands here
+        # Component Level Commands
         if cmd == 'component' :
             if sub == 'export' :
                 tools.terminal('\nExport component(s) from the project in their current state. \n')
@@ -603,10 +610,13 @@ def userArguments (args) :
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
                     # PDFs are already rendered so this really amounts to "glueing" them together
                     Project(pid, gid).renderGroup(cidList, pages, override, save)
+                    # Just to be safe we will just turn everything off
+                    resetOutputBackgroundFeatures(pid)
                 else :
                     sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
+        # Group Level Commands
         elif cmd == 'group' :
             if sub == 'export' :
                 tools.terminal('\nExport an entire group of components from the project in its current state. \n')
@@ -638,16 +648,57 @@ def userArguments (args) :
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
                     # Now we will render
                     Project(pid, gid).renderGroup(None, pages, override, save)
+                    # Just to be safe we will just turn everything off
+                    resetOutputBackgroundFeatures(pid)
                 else :
                     sys.exit('\nERROR: Sorry, the ' + cType + ' component type is not currently supported. Process halting.\n')
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
+        # Project Level Commands
         elif cmd == 'project' :
             if sub == 'bind' :
-                # Bind the rendered output of all the groups together
-                pass
+                # A background and doc info can be added in a bind
+                # operation, but not a diagnostic layer
+                if args.background and args.doc_info :
+                    # Turn on background and Doc info
+                    ProjBackground(pid).turnOnBackground()
+                    ProjBackground(pid).turnOnDocInfo()
+                    # Make sure diagnostic is off
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffBackground()
+                    ProjBackground(pid).turnOffDocInfo()
+                elif args.background :
+                    # Turn on background
+                    ProjBackground(pid).turnOnBackground()
+                    # Make sure doc info and diagnostic is off
+                    ProjBackground(pid).turnOffDocInfo()
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffBackground()
+                elif args.doc_info :
+                    # Turn on background
+                    ProjBackground(pid).turnOnDocInfo()
+                    # Make sure background and diagnostic is off
+                    ProjBackground(pid).turnOffBackground
+                    ProjDiagnose(pid).turnOffDiagnostic()
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
+                    # Last one out turn off the lights :-)
+                    ProjBackground(pid).turnOffDocInfo()
+                else :
+                    # Bind the groups, save here is used to save the file
+                    # in the Deliverables folder
+                    ProjBinding(pid).bind(save)
             else :
-                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' content. Process halting.\n')
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
 
 
     ##### SETTING
@@ -726,7 +777,7 @@ if __name__ == '__main__' :
     pcCmd              = ['component', 'group', 'project']
     pcSubCmd           = ['bind', 'export', 'preprocess', 'postprocess', 'render']
     # Setting
-    stConf             = ['adjustment', 'illustration', 'layout', 'project', 'usfmTex']
+    stConf             = ['adjustment', 'illustration', 'layout', 'project', 'rapuma', 'usfmTex']
 
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')
@@ -744,9 +795,9 @@ if __name__ == '__main__' :
     # Add Content subprocess arguments
     contentCommand = subparsers.add_parser('content', help='General project content management commands')
     contentCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    contentCommand.add_argument('group_id', help='A unique ID for this group.')
     contentCommand.add_argument('command', choices=ctCmd, help='Specify either group or component which will be acted on.')
     contentCommand.add_argument('sub_command', choices=ctSubCmd, help='Commands that can be used for managing groups and components.')
+    contentCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
     contentCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     contentCommand.add_argument('-c', '--comp_type', choices=ctCompType, help='The group component type is needed for creating a new group.')
     contentCommand.add_argument('-p', '--path', help='A path to were component files may be found.')
@@ -754,9 +805,9 @@ if __name__ == '__main__' :
     # Add project Asset management subprocess arguments
     assetCommand = subparsers.add_parser('asset', help='General project asset handling commands')
     assetCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
-    assetCommand.add_argument('group_id', help='A unique ID for this group used to assign certain assets.')
     assetCommand.add_argument('command', choices=asCmd, help='The general commands that can be used for managing assets.')
     assetCommand.add_argument('sub_command', choices=asSubCmd, help='Sub commands that can be used for managing project assets.')
+    assetCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
     assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
     assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
@@ -769,15 +820,15 @@ if __name__ == '__main__' :
     processCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     processCommand.add_argument('command', choices=pcCmd, help='The general commands that can be used for managing project processes.')
     processCommand.add_argument('sub_command', choices=pcSubCmd, help='Sub commands that can be used for managing project processes.')
-    processCommand.add_argument('group_id', help='A unique ID for this group.')
+    processCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
     processCommand.add_argument('-p', '--path', help='A path to be used in a process.')
     processCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
-    processCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
     processCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
+    processCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
     processCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
     processCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     processCommand.add_argument('-s', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
-    processCommand.add_argument('-g', '--pages', help='Specify a page number or range of pages to render.')
+    processCommand.add_argument('-a', '--pages', help='Specify a page number or range of pages to render.')
     processCommand.add_argument('-o', '--override', help='A specific file name used to override normal automated output file name creation.')
 
     # Add Settings subprocess arguments
