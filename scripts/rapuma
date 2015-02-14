@@ -572,7 +572,7 @@ def userArguments (args) :
     ##### PROCESS
     # Commands for processes performed on the project
     elif sys.argv[1].lower() == 'process' :
-        pid         = validatePid(args.project_id)
+        pid         = validateLocalPid(args.project_id)
         gid         = args.group_id
         cmd         = args.command
         sub         = args.sub_command
@@ -589,6 +589,8 @@ def userArguments (args) :
         cType       = ''
         # For some processes we need to have the cType
         if not cmd == 'project' :
+            if not gid :
+                sys.exit('\nERROR: Must provide a Group ID for this process. Process halting.\n')
             cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
         # Clean up the CID list
         if cidList :
