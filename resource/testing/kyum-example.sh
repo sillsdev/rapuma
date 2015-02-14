@@ -115,3 +115,15 @@ set -v
 # Bind the results
 ~/Projects/rapuma/scripts/rapuma process KYU-MYMR-KYUMTEST project bind --save --background --doc_info
 
+# Sharing with the cloud
+# Start clean
+rm -rf ~/Publishing/my_cloud
+mkdir -p ~/Publishing/my_cloud
+# Run share commands
+~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST share push --path ~/Publishing/my_cloud
+~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST share pull --path ~/Publishing/my_cloud
+~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST share push --path ~/Publishing/my_cloud --replace
+~/Projects/rapuma/scripts/rapuma publication KYU-MYMR-KYUMTEST share pull --path ~/Publishing/my_cloud --replace
+
+
+

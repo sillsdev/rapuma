@@ -263,6 +263,40 @@ def resetOutputBackgroundFeatures (pid) :
     ProjBackground(pid).turnOffBackground()
 
 
+def validateLocalPid (pid) :
+    '''Validate the PID against the local project list, return it if it is good.'''
+    if pid in projList :
+        return pid
+
+
+def validatePid (pid, path = None) :
+    '''Do a validation/existance check on a PID. Return the PID if it is
+    a local installed project or found in the given path. Kill the process
+    if it is not.'''
+
+    results = ''
+    # When a path is given we check that first
+    if path :
+        if os.path.isfile(os.path.join(validatePath(path), pid, 'Config', 'project.conf')) :
+            results = pid
+    else :
+        if pid in projList :
+            results = pid
+    if results :
+        return pid
+    else :
+        sys.exit('\n Sorry, Project ID [' + pid + '] does not appear to be valid. Process halting.\n')
+
+
+def validatePath (path) :
+    '''Return a resolved path if it is good, kill the process if not.'''
+
+    realPath = tools.resolvePath(path)
+    if os.path.exists(realPath) :
+        return realPath
+    else :
+        sys.exit('\nERROR: Sorry but the path you provided does not seem to be valid: [' + path + ']. Process halting.\n')
+
 
 ###############################################################################
 ########################### Rapuma Command Center #############################
@@ -283,13 +317,6 @@ def userArguments (args) :
     local = None
     pid = ''
     
-    # Validate the PID, halt if it isn't good, return if it is
-    def validatePid (pid) :
-        if pid in projList :
-            return pid
-        else :
-            sys.exit('\nERROR: The project ID given [' + pid + '] is not valid. Process halting.\n')
-
     # Common error handlers
     def cmdError (cmd, cmdType) :
         sys.exit('\nERROR: The ' + cmd + ' command is not valid to use with ' + cmdType + '. Process halting.\n')
@@ -304,28 +331,17 @@ def userArguments (args) :
             tools.terminal('About: ' + systemAbout + '\n')
             return
 
-    ##### PROJECT
+    ##### PUBLICATION
     # Project level commands
     elif sys.argv[1].lower() == 'publication' :
         cmd         = args.command
         sub         = args.sub_command
-        # Only when creating a project can a non-valid PID be used
-        if cmd != 'project' and sub != 'create' :
-            pid     = validatePid(args.project_id)
-        else :
-            pid     = args.project_id
-        path        = ''
         mediaType   = None
         if args.media_type :
             mediaType = args.media_type
         else :
             # The default is book
             mediaType = 'book'
-        # Source path is optional but if given, resolve it
-        if args.path :
-            path = tools.resolvePath(args.path)
-            if not os.path.exists(path) :
-                sys.exit('\nERROR: Sourct path is not valid [' + path + ']. Process halting.\n')
         # Figure out what area this command relates to and do it
         if cmd == 'archive' :
             tools.terminal('\nCreat an archive of the current project. This will overwrite any previous achive made.\n')
@@ -333,16 +349,35 @@ def userArguments (args) :
         elif cmd == 'backup' :
             tools.terminal('\nCreate a backup of the project. (Multiple backups can be stored.) \n')
             sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
+        # Create or remove a project
         elif cmd == 'project' :
             if sub == 'create' :
-                ProjSetup(sysConfig, pid).newProject(mediaType)
+                ProjSetup(sysConfig, args.project_id).newProject(mediaType)
             elif sub == 'remove' :
-                ProjDelete().deleteProject(pid)
+                    ProjDelete().deleteProject(args.project_id)
             else :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
+        # Push or pull a project to or from the cloud
         elif cmd == 'share' :
-            tools.terminal('\nSave the project to a virtural drive (cloud) to share with another user. Note only one user can work on the project at a time. \n')
-            sys.exit('\n Unfortunately, the ' + cmd + ' command has not been implemented yet. Process halting.\n')
+            # Sort out source and target depending on push or pull
+            if sub == 'pull' :
+                # Pull in a shared project from local cloud (Dropbox/Google Drive/etc)
+                pid = validatePid(args.project_id, args.path)
+                source = os.path.join(args.path, pid)
+                target = os.path.join(projDir, pid)
+            elif sub == 'push' :
+                # Push a new shared project to your local cloud (Dropbox/Google Drive/etc)
+                pid = validatePid(args.project_id)
+                path = validatePath(args.path)
+                source = os.path.join(projDir, pid)
+                target = os.path.join(path, pid)
+            else :
+                sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
+            # Now that we have sorted out source and target we can get on with the work
+            if args.replace :
+                ProjData(pid).replaceProject(source, target)
+            else :
+                ProjData(pid).mergeProjects(source, target)
 
     ##### CONTENT
     # Project level commands
@@ -764,7 +799,7 @@ if __name__ == '__main__' :
 
     # Project
     puCmd              = ['archive', 'backup', 'project', 'share']
-    puSubCmd           = ['create', 'remove', 'restore', 'save', 'update']
+    puSubCmd           = ['create', 'pull', 'push', 'remove', 'restore', 'save', 'update']
     puMediaType        = ['book']
     # Content
     ctCmd              = ['component', 'group']
@@ -791,6 +826,7 @@ if __name__ == '__main__' :
     projCommand.add_argument('sub_command', choices=puSubCmd, help='Specify the command action to be executed on the project. This is required for all project processing functions.')
     projCommand.add_argument('-m', '--media_type', choices=puMediaType, help='If creating a new project, give a valid project media type code. The default is "book".')
     projCommand.add_argument('-p', '--path', help='A local path needed for certain operations.')
+    projCommand.add_argument('-r', '--replace', action='store_true', help='Force a full replacement of project data.')
 
     # Add Content subprocess arguments
     contentCommand = subparsers.add_parser('content', help='General project content management commands')

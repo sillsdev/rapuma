@@ -578,6 +578,9 @@ class ProjSetup (object) :
         case from the "this project already existed before" case. If we're
         creating a brand-new project, it will have a project.conf file but
         nothing else.'''
+
+#        import pdb; pdb.set_trace()
+
         projHome = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         result = False
         if not os.path.exists(projHome) :

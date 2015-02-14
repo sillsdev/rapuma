@@ -59,11 +59,11 @@ class ProjData (object) :
             '3625' : ['ERR', 'The path given to the backup folder is not valid [<<1>>]. Please set the system backup path.'],
             '3630' : ['MSG', 'Backup for [<<1>>] created and saved to: [<<2>>]'],
 
-            '4110' : ['MSG', 'Completed pushing/saving data to the cloud.'],
+            '4110' : ['MSG', 'Completed merging data.'],
             '4120' : ['MSG', 'No files updated.'],
             '4130' : ['MSG', 'Added: <<1>> file(s).'],
             '4140' : ['MSG', 'Updated: <<1>> file(s)'],
-            '4150' : ['WRN', 'Because force (-f) was used, the existing cloud project [<<1>>] has been flushed. The local project will replace it.'],
+            '4150' : ['WRN', 'The project data in: [<<1>>] will be replaced with the data from: [<<2>>].'],
 
             '4210' : ['MSG', 'Completed pulling/restoring data from the cloud.'],
             '4220' : ['ERR', 'Cannot resolve path: [<<1>>]'],
@@ -88,7 +88,7 @@ class ProjData (object) :
 ####################### Error Code Block Series = 2000 ########################
 ###############################################################################
 
-    def makeExcludeFileList (self) :
+    def makeExcludeFileList (self, source) :
         '''Return a list of files that are not necessary to be included in a backup
         template or an archive. These will be all auto-generated files that containe system-
         specific paths, etc.'''
@@ -98,7 +98,7 @@ class ProjData (object) :
         excludeFolders      = ['Draft', 'Final', 'HelperScript', 'Proof']
 
         # Process the excluded folders
-        for root, dirs, files in os.walk(self.local.projHome) :
+        for root, dirs, files in os.walk(source) :
             for fileName in files :
                 if os.path.basename(root) in excludeFolders :
                     excludeFiles.append(os.path.join(root, fileName))
@@ -147,7 +147,7 @@ class ProjData (object) :
             self.tools.dieNow()
 
         # Get a list of files we don't want
-        excludeFiles = self.makeExcludeFileList()
+        excludeFiles = self.makeExcludeFileList(source)
 
         self.zipUpProject(archTarget, excludeFiles)
 
@@ -320,7 +320,7 @@ class ProjData (object) :
 #        import pdb; pdb.set_trace()
 
         # Zip up but use a list of files we don't want
-        self.zipUpProject(backupTarget, self.makeExcludeFileList())
+        self.zipUpProject(backupTarget, self.makeExcludeFileList(source))
 
         # Cull out any excess backups
         if not targetPath :
@@ -562,77 +562,59 @@ class ProjData (object) :
         self.tools.writeConfFile(projectConfig)
 
 
-    def pushToCloud (self, force = None) :
-        '''Push local project data to the cloud. If a file in the 
-        cloud is older than the project file, it will be overwritten 
-        with the local version. Otherwise, it will be skipped. 
-        Because the local is being pushed, the owner should be 
-        changed to the local user. If force is used we will "flush" 
-        the project cloud storage area so all the local data will 
-        become the new version in the cloud. This could be risky if 
-        the cloud contained information that was stored no other 
-        place.'''
+    def replaceProject (self, source, target) :
+        '''This will completly replace an existing project (target)
+        with data from another project (source). This assumes
+        source and target are valid.'''
 
-        # Check to see if the cloud is good to go
-        cloud = self.checkCloud()
-        # Manually make a path to the cloud project in case it is not
-        # there already.
-        cPid = os.path.join(cloud, self.pid)
+        # We simply just get rid of the target before doing a merge
+        shutil.rmtree(target)
+        self.log.writeToLog(self.errorCodes['4150'], [target, source])
+        self.mergeProjects(source, target)
 
-        # If force is used, flush the project from the cloud
-        if force :
-            if os.path.isdir(cPid) :
-                shutil.rmtree(cPid)
-                self.log.writeToLog(self.errorCodes['4150'], [self.pid])
 
-        # Create a cloud folder if needed
-        if not os.path.isdir(cPid) :
-            os.makedirs(cPid)
-
-        # Check for existence of this project in the cloud and who owns it
-        pc = Config(self.pid)
-        pc.getProjectConfig()
-        projectConfig = pc.projectConfig
-        self.setCloudPushTime(projectConfig)
-        self.buyCloud(projectConfig)
-
-        # When everything is sorted out do the push.
+    def mergeProjects(self, source, target) :
+        '''This will merge two Rapuma projects and try to preserve
+        data in the target that is newer than the source. This assumes
+        target and source are valid.'''
+        
         # Get a list of files we do not want
-        excludeFiles        = self.makeExcludeFileList()
+        excludeFiles        = self.makeExcludeFileList(source)
 
         # Get a total list of files from the project
         cn = 0
         cr = 0
         # Add space for output message
         sys.stdout.write('\n')
-        sys.stdout.write('Pushing files to the cloud')
+        sys.stdout.write('Merging files from: ' + source + ' to: ' + target)
         sys.stdout.flush()
-        for folder, subs, files in os.walk(self.local.projHome):
+        for folder, subs, files in os.walk(source):
             for fileName in files:
                 # Do not include any backup files we find
                 if fileName[-1] == '~' :
                     continue
                 if os.path.join(folder, fileName) not in excludeFiles :
-                    if not os.path.isdir(folder.replace(self.local.projHome, cPid)) :
-                        os.makedirs(folder.replace(self.local.projHome, cPid))
-                    cFile = os.path.join(folder, fileName).replace(self.local.projHome, cPid)
-                    pFile = os.path.join(folder, fileName)
-                    if not os.path.isfile(cFile) :
+                    if not os.path.isdir(folder.replace(source, target)) :
+                        os.makedirs(folder.replace(source, target))
+                    targetFile = os.path.join(folder, fileName).replace(source, target)
+                    sourceFile = os.path.join(folder, fileName)
+                    if not os.path.isfile(targetFile) :
                         sys.stdout.write('.')
                         sys.stdout.flush()
-                        shutil.copy(pFile, cFile)
+                        shutil.copy(sourceFile, targetFile)
                         cn +=1
                     # Otherwise if the cloud file is older than
                     # the project file, refresh it
-                    elif self.tools.isOlder(cFile, pFile) :
-                        if os.path.isfile(cFile) :
-                            os.remove(cFile)
+                    elif self.tools.isOlder(targetFile, sourceFile) :
+                        if os.path.isfile(targetFile) :
+                            os.remove(targetFile)
                         sys.stdout.write('.')
                         sys.stdout.flush()
-                        shutil.copy(pFile, cFile)
+                        shutil.copy(sourceFile, targetFile)
                         cr +=1
         # Add space for next message
         sys.stdout.write('\n')
+
 
         # Report what happened
         self.log.writeToLog(self.errorCodes['4110'])
@@ -645,101 +627,6 @@ class ProjData (object) :
                 self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
 
         return True
-
-
-    def pullFromCloud (self) :
-        '''Pull data from cloud storage and replace local data. Cloud
-        data always overwrites local data on pull.'''
-
-#        import pdb; pdb.set_trace()
-
-        # Check to see if the cloud project is good to go
-        cPid = self.checkCloudProject()
-
-        # Empty out all the project contents except the HelperScript folder
-        # This is so we don't loose our place in the terminal.
-        for folder, subs, files in os.walk(self.local.projHome):
-            # Remove the rapuma log file (might need for this to be better)
-            if os.path.exists(os.path.join(self.local.projHome, 'rapuma.log')) :
-                os.remove(os.path.join(self.local.projHome, 'rapuma.log'))
-            if folder == self.local.projHome :
-                continue
-            elif os.path.split(folder)[1] == 'HelperScript' :
-                continue
-            else :
-                # Remove everything else
-                shutil.rmtree(folder)
-
-        # Pull in the data from the project in the cloud
-        cn = 0
-        cr = 0
-        sys.stdout.write('\nPulling files from the cloud')
-        sys.stdout.flush()
-        for folder, subs, files in os.walk(cPid):
-            for fileName in files:
-                if not os.path.isdir(folder.replace(cPid, self.local.projHome)) :
-                    os.makedirs(folder.replace(cPid, self.local.projHome))
-                cFile = os.path.join(folder, fileName)
-                pFile = os.path.join(folder, fileName).replace(cPid, self.local.projHome)
-                if not os.path.isfile(pFile) :
-                    shutil.copy(cFile, pFile)
-                    cn +=1
-                elif self.tools.isOlder(pFile, cFile) :
-                    if os.path.isfile(pFile) :
-                        os.remove(pFile)
-                    shutil.copy(cFile, pFile)
-                    cr +=1
-                sys.stdout.write('.')
-                sys.stdout.flush()
-        # Add space for next message
-        sys.stdout.write('\n')
-
-        # Report what happened
-        self.log.writeToLog(self.errorCodes['4210'])
-        if cn == 0 and cr == 0 :
-            self.log.writeToLog(self.errorCodes['4120'])
-        else :
-            if cn > 0 :
-                self.log.writeToLog(self.errorCodes['4130'], [str(cn)])
-            if cr > 0 :
-                self.log.writeToLog(self.errorCodes['4140'], [str(cr)])
-
-        # Reset the local and log now
-        self.local      = ProjLocal(self.pid)
-        self.log        = ProjLog(self.pid)
-        # Claim the local copy of the project
-        self.buyLocal(self.getConfig(self.local.projHome))
-        self.log.writeToLog(self.errorCodes['4270'], [self.pid,self.getLocalOwner()])
-
-        # Add helper scripts if needed
-        if self.tools.str2bool(self.userConfig['System']['autoHelperScripts']) :
-            ProjCommander(self.pid).updateScripts()
-
-
-    def checkCloud (self) :
-        '''Check to see if the cloud path and cloud project path is 
-        good. If not the process will be halted.'''
-        
-        if self.userConfig['Resources']['cloud'] != '' :
-            cloud = self.tools.resolvePath(self.userConfig['Resources']['cloud'])
-            if not os.path.exists(cloud) :
-                self.tools.dieNow('Error: Path to cloud not valid: [' + cloud + ']')
-        else :
-            self.tools.dieNow('Error: No path to the cloud has been configured.')
-            
-        return cloud
-
-
-    def checkCloudProject (self) :
-        '''Check to see if the cloud project path is good. If not the 
-        process will be halted.'''
-        
-        cloud = self.checkCloud()
-        cPid = os.path.join(cloud, self.pid)
-        if not os.path.exists(cPid) :
-            self.tools.dieNow('Error: Project [' + self.pid + '] not found in the cloud.')
-            
-        return cPid
 
 
     def getProjHome (self, tPath = None) :
@@ -827,7 +714,7 @@ class Template (object) :
         os.remove(os.path.join(tempDir, 'rapuma.log'))
 
         # Exclude files
-        excludeFiles = self.projData.makeExcludeFileList()
+        excludeFiles = self.projData.makeExcludeFileList(source)
 
         # Zip it up using the above params
         root_len = len(tempDir)
