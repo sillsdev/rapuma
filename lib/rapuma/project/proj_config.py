@@ -50,6 +50,15 @@ class Config (object) :
         self.adjustmentConfig               = None
         self.layoutConfig                   = None
         self.illustrationConfig             = None
+        
+# FIXME: I am not comfortable with injecting the macPackConfig here, but
+# this seems to be the only work around for the problem of calling out
+# settings from this config from within this module. Got to get this fixed,
+# the madness must end.
+        try :
+            self.macPackConfig                  = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        except :
+            pass
 
         # Log messages for this module
         self.errorCodes     = {
@@ -77,6 +86,7 @@ class Config (object) :
         else :
             self.cType                      = None
             self.Ctype                      = None
+
 
 
 ###############################################################################
@@ -336,5 +346,4 @@ class Config (object) :
         '''Return the value with the specified measurement unit attached.'''
         
         return self.layoutConfig['GeneralSettings']['measurementUnit']
-
 

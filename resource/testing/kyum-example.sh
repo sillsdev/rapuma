@@ -96,6 +96,8 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section ChapterVerse --key useMarginalVerses --value True
 # Binding
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key startPageNumber --value 274
+# Footnotes
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST usfmTex --section Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
 
 ## RENDERING
 # Turn off PDF viewing to avoid screen clutter
