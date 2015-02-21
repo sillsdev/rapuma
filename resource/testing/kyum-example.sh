@@ -59,10 +59,10 @@ set -v
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro remove --group GOSPEL --package_id usfmTex
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --group GOSPEL --package_id usfmTex
 # Fonts
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --group GOSPEL --path ~/Publishing/my_source/assets/fonts/Charis\ SIL_4.106.zip --primary
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --group GOSPEL --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip --primary
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font remove --group GOSPEL --package_id "Charis SIL_4.106"
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font update --group GOSPEL --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Charis\ SIL_4.106.zip
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --group GOSPEL --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font remove --package_id "Charis SIL_4.106"
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font update --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip
 # Illustrations
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST illustration add --group GOSPEL --path ~/Publishing/my_source/assets/illustrations
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST illustration remove --group GOSPEL  

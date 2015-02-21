@@ -123,7 +123,7 @@ class ProjLocal (object) :
                                     debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']) + '\n')
 
         # Add configuation file names
-        configFiles = ['project', 'adjustment', 'layout', 'illustration']
+        configFiles = ['project', 'adjustment', 'layout', 'illustration', 'font']
         # Create placeholders for basic conf file names
         for cf in configFiles :
             setattr(self, cf + 'ConfFile', None)

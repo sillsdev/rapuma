@@ -57,7 +57,7 @@ class Usfm (Group) :
         self.project                = project
         self.local                  = project.local
         self.tools                  = Tools()
-        self.proj_font              = ProjFont(self.pid, self.gid)
+        self.proj_font              = ProjFont(self.pid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_macro             = Macro(self.pid, self.gid)

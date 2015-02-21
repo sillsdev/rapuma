@@ -981,6 +981,17 @@ class ProjSetup (object) :
             return False
 
 
+    def isCompType (self, cType) :
+        '''Return true if the component type is present in the project.conf file.'''
+
+        obj = self.getConfigObj('project')
+        try :
+            if cType.capitalize() in obj['CompTypes'] :
+                return True
+        except :
+            return False
+
+
     def getConfigObj (self, config) :
         '''Return a config file object for processing.'''
 

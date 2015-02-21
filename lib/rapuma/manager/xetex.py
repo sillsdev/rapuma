@@ -27,6 +27,7 @@ from rapuma.project.proj_config         import Config
 from rapuma.project.proj_macro          import Macro
 from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_diagnose       import ProjDiagnose
+from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.group.usfmTex               import UsfmTex
 from rapuma.group.usfm_data             import UsfmData
@@ -69,7 +70,9 @@ class Xetex (Manager) :
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
+        self.proj_config.getFontConfig()
         # Bring in some manager objects we will need
+        self.proj_font              = ProjFont(self.pid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.usfmData               = UsfmData()
         self.cidChapNumDict         = self.usfmData.cidChapNumDict()
@@ -77,6 +80,7 @@ class Xetex (Manager) :
         # Get config objs
         self.projectConfig          = self.proj_config.projectConfig
         self.layoutConfig           = self.proj_config.layoutConfig
+        self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
         self.macPack                = None
         self.macPackConfig          = None
@@ -377,23 +381,33 @@ class Xetex (Manager) :
                         for line in linesOut :
                             writeObject.write(line + '\n')
 
+
+
+
+
+
+
+
+#            import pdb; pdb.set_trace()
+
+
             # Continue here with injecting the font settings which are guided by
             # the config file because the XML source(s) could vary
             writeObject.write('\n% INSTALLED FONTS\n')
-            installedFonts = self.macPackConfig['Fonts'].keys()
-            primaryFont = self.macPackConfig['FontSettings']['primaryFont']
+            installedFonts = self.fontConfig['Fonts'].keys()
+            cTypeFont = self.projectConfig['CompTypes'][self.cType.capitalize()]['fontName']
             for font in installedFonts :
-                if font == primaryFont :
+                if font == cTypeFont :
                     # Output the primary font
-                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'].keys() :
-                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['PrimaryFont'][key]) + '\n')
+                    for key in self.fontConfig['Fonts'][font]['TexMapping']['PrimaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.fontConfig['Fonts'][font]['TexMapping']['PrimaryFont'][key]) + '\n')
                     # Output the seconday settings as well for this font
-                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
-                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
-                if not font == primaryFont :
+                    for key in self.fontConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.fontConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
+                else :
                     # There can only be one primary font, this is not it
-                    for key in self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
-                        writeObject.write(self.proj_config.processNestedPlaceholders(self.macPackConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
+                    for key in self.fontConfig['Fonts'][font]['TexMapping']['SecondaryFont'].keys() :
+                        writeObject.write(self.proj_config.processNestedPlaceholders(self.fontConfig['Fonts'][font]['TexMapping']['SecondaryFont'][key]) + '\n')
 
                 writeObject.write('\n')
 

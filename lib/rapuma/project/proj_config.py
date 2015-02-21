@@ -50,6 +50,7 @@ class Config (object) :
         self.adjustmentConfig               = None
         self.layoutConfig                   = None
         self.illustrationConfig             = None
+        self.fontConfig                     = None
         
 # FIXME: I am not comfortable with injecting the macPackConfig here, but
 # this seems to be the only work around for the problem of calling out
@@ -120,6 +121,12 @@ class Config (object) :
         '''Load/return the illustration configuation object.'''
         
         self.illustrationConfig = self.tools.loadConfig(self.local.illustrationConfFile, self.local.illustrationConfXmlFile)
+
+
+    def getFontConfig (self) :
+        '''Load/return the font configuation object.'''
+        
+        self.fontConfig = self.tools.loadConfig(self.local.fontConfFile, self.local.fontConfXmlFile)
 
 
     #def getMacPackConfig (self, macPack) :
@@ -241,31 +248,25 @@ class Config (object) :
         '''Get a special font setting if there is one. Otherwise
         return null.'''
 
-# FIXME: This is not ideal (perhaps really bad) but we have to call this
-# config file in for just this instance. This is because the function
-# we would normall use conflicts with this Class (proj_macro.Macro().getMacPackConfig())
-# Once font and macro handling are reworked, this problem will go away.
-        macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-
         # FIXME: This may need to be moved to Fonts, plus it might be a
         # little brittle. Using primaryFont for a default might be asking
         # for trouble
         result = ''
         if value == 'mapping' :
-            useMapping      = macPackConfig['FontSettings']['useMapping']
-            primaryFont     = macPackConfig['FontSettings']['primaryFont']
+            useMapping      = self.fontConfig['GeneralSettings']['useMapping']
+            primaryFont     = self.projectConfig['CompTypes'][self.cType.capitalize()]['fontName']
             if useMapping :
                 result = ':mapping=' + os.path.join(self.local.projFontFolder, primaryFont, useMapping)
         elif value == 'renderer' :
-            useRenderingSystem = macPackConfig['FontSettings']['useRenderingSystem']
+            useRenderingSystem = self.fontConfig['GeneralSettings']['useRenderingSystem']
             if useRenderingSystem :
                 result = '/' + useRenderingSystem
         elif value == 'language' :
-            useLanguage = macPackConfig['FontSettings']['useLanguage']
+            useLanguage = self.fontConfig['GeneralSettings']['useLanguage']
             if useLanguage :
                 result = ':language=' + useLanguage
         elif value == 'feature' :
-            useFeature = macPackConfig['FontSettings']['useFeature']
+            useFeature = self.fontConfig['GeneralSettings']['useFeature']
             if useFeature :
                 result = ':' + useFeature
 

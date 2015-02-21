@@ -372,6 +372,12 @@ Todo:
         </setting>
     </section>
 
+
+
+<!-- Note most of the font settings in the macro will need to reference the font.conf when that is implemented. -->
+
+
+
     <section>
         <name>Font Settings</name>
         <sectionID>FontSettings</sectionID>
@@ -401,6 +407,11 @@ Todo:
             <texCode>\def\VerticalSpaceFactor{[val]}</texCode>
         </setting>
     </section>
+
+
+
+
+
 
     <section>
         <name>Header and Footer</name>

@@ -489,15 +489,21 @@ def userArguments (args) :
         postprocess = args.postprocess
         path        = ''
         source      = ''
-        primary     = args.primary
+        cType       = ''
         # Check GID
-        if not ProjSetup(sysConfig, pid).isGroup(gid) :
-            sys.exit('\nERROR: Group ID is not valid. [' + gid + '] Process halting.\n')
+        if cmd != 'font' :
+            if not ProjSetup(sysConfig, pid).isGroup(gid) :
+                sys.exit('\nERROR: Group ID is not valid: [' + gid + '] Process halting.\n')
         # Path set and test for existance of file or folder
         if args.path :
             path = args.path
             if not os.path.exists(path) :
-                sys.exit('\nERROR: Path is not valid. [' + path + '] Process halting.\n')
+                sys.exit('\nERROR: Path is not valid: [' + path + '] Process halting.\n')
+        # Check for valid cType if one was given
+        if args.component_type :
+            cType = args.component_type
+            if not ProjSetup(sysConfig, pid).isCompType(cType) :
+                sys.exit('\nERROR: Component type given is not valid: [' + cType + '] Process halting.\n')
 
         # Begin processing commands here
         if cmd == 'background' :
@@ -506,22 +512,20 @@ def userArguments (args) :
                 ProjBackground(pid, gid).createBackground()
         elif cmd == 'font' :
             # Test path/file if there is one
-            if not os.path.isfile(path) :
+            if path and not os.path.isfile(path) :
                 sys.exit('\nERROR: File name [' + tools.fName(path) + '] does not appear to be valid. Process halting.\n')
             # Add a font package to the project
             if sub == 'add' :
-                ProjFont(pid, gid).installFont(path)
-                if primary :
-                    ProjFont(pid, gid).setPrimaryFont(tools.fName(path))
+                ProjFont(pid).installFont(path, cType)
             # Remove a font from the project (font ID is the file name less .zip extension)
             elif sub == 'remove' :
-                if ProjFont(pid, gid).varifyFont(packageId) :
-                    ProjFont(pid, gid).removeFontPack(packageId)
+                if ProjFont(pid).isFont(packageId) :
+                    ProjFont(pid).removeFontPack(packageId)
                 else :
                     sys.exit('\n Sorry to say, but the font package ID you provided ' + packageId + ' does not match any fonts in the project. I have to stop now but please come back and try again.\n')
             # Update a font in the project
             elif sub == 'update' :
-                ProjFont(pid, gid).updateFontPack(path)
+                ProjFont(pid).updateFontPack(path)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 ProjIllustration(pid, gid).addIllustrationFiles(path)
@@ -799,7 +803,7 @@ if __name__ == '__main__' :
 
     # Available choices
 
-    # Project
+    # Publication
     puCmd              = ['archive', 'backup', 'project', 'share']
     puSubCmd           = ['create', 'pull', 'push', 'remove', 'restore', 'save', 'update']
     puMediaType        = ['book']
@@ -821,7 +825,7 @@ if __name__ == '__main__' :
     parser.add_argument('-b', '--basic', action='store_true', help = 'Basic Rapuma help (in HTML)')
     parser.add_argument('-V', '--version', action='version', version=systemVersion, help = 'Show the program version and exit, doing nothing else')
 
-    # Add Project subprocess arguments
+    # Add Publication subprocess arguments
     projCommand = subparsers.add_parser('publication', help='General publication management commands')
     projCommand.add_argument('project_id', help='Project ID (a positional argument required for all actions with this subprocess)')
     projCommand.add_argument('command', choices=puCmd, help='The general commands that can be used for managing a project.')
@@ -846,9 +850,8 @@ if __name__ == '__main__' :
     assetCommand.add_argument('command', choices=asCmd, help='The general commands that can be used for managing assets.')
     assetCommand.add_argument('sub_command', choices=asSubCmd, help='Sub commands that can be used for managing project assets.')
     assetCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
-    assetCommand.add_argument('-f', '--file_name', help='An asset file name.')
+    assetCommand.add_argument('-c', '--component_type', help='Indicate a component type for this command.')
     assetCommand.add_argument('-p', '--path', help='A path to were asset files may be found.')
-    assetCommand.add_argument('-i', '--primary', action='store_true', help='Used to signifiy a font being installed will be the primary body text font.')
     assetCommand.add_argument('-r', '--preprocess', action='store_true', help='Type designator for a preprocessing script. Required parameter for handling preprocess scripts.')
     assetCommand.add_argument('-o', '--postprocess', action='store_true', help='Type designator for a postprocessing script. Required parameter for handling preprocess scripts.')
     assetCommand.add_argument('-k', '--package_id', help='A package ID is required for managing some assets like fonts and macros')

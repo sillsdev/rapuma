@@ -55,5 +55,12 @@ Todo:
         <type>string</type>
         <value>usfmTex</value>
     </setting>
+    <setting>
+        <name>Font Name</name>
+        <key>fontName</key>
+        <description>The font use to render components for this type. Use only the Rapuma recognized name for this font.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
 </root>
 
