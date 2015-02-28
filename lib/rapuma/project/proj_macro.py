@@ -24,8 +24,9 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
-from rapuma.group.usfmTex               import UsfmTex
 from rapuma.project.proj_config         import Config
+
+#from rapuma.group.usfmTex               import UsfmTex
 
 
 ###############################################################################
@@ -34,7 +35,7 @@ from rapuma.project.proj_config         import Config
 
 class Macro (object) :
 
-    def __init__(self, pid, gid = None) :
+    def __init__(self, pid, gid=None) :
         '''Do the primary initialization for this class.'''
 
         self.pid                            = pid
@@ -43,51 +44,53 @@ class Macro (object) :
         self.userConfig                     = self.user.userConfig
         self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.local                          = ProjLocal(pid)
+        self.proj_config                    = Config(pid)
+        self.proj_config.getProjectConfig()
+        self.projectConfig                  = self.proj_config.projectConfig
+        self.layoutConfig                   = self.proj_config.layoutConfig
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
         # Create config placeholders
-        self.projectConfig                  = None
-        self.adjustmentConfig               = None
         self.layoutConfig                   = None
         self.illustrationConfig             = None
-        self.macPackConfig                  = None
+        self.macroConfig                    = self.tools.loadConfig(self.local.macroConfFile, self.local.macroConfXmlFile)
 
         # Log messages for this module
         self.errorCodes     = {
+            '3010' : ['ERR', 'No macro package is registered for the [<<1>>] component type.'],
+            '3050' : ['ERR', 'Macro package file not found: [<<1>>]'],
             '3100' : ['ERR', 'Macro package: [<<1>>] already exists in the project. I am not allowed to copy over an existing package.'],
             '3200' : ['ERR', 'Failed to install macro package: [<<1>>]'],
-            '3300' : ['MSG', 'Install macro package: [<<1>>], Reinitialized [<<2>>]'],
+            '3300' : ['MSG', 'Installed macro package: [<<1>>], Reinitialized [<<2>>]'],
             '3310' : ['ERR', 'Failed to copy [<<1>>] to folder [<<2>>].'],
-            '3400' : ['MSG', 'Removed macro package configuration file: [<<1>>]. Font information may have been lost in the operation too. This was collateral damage. Sorry about that.'],
+            '3400' : ['MSG', 'Removed macro package configuration settings for: [<<1>>] from the macro.conf file.'],
             '3500' : ['MSG', 'Removed macro package [<<1>>] folder and all files contained.'],
             '3600' : ['MSG', 'Updated macro package [<<1>>]'],
             '3650' : ['ERR', 'Failed to updated macro package [<<1>>]']
         }
-
-        # Test for gid before trying to finish the init
-
-#        import pdb; pdb.set_trace()
-
-        if gid :
-            if not self.projectConfig :
-                self.proj_config                    = Config(pid, gid)
-                self.proj_config.getProjectConfig()
-                self.projectConfig                  = self.proj_config.projectConfig
-                self.layoutConfig               = self.proj_config.layoutConfig
-            # Reinitialize local
-            self.local                      = ProjLocal(pid, gid, self.projectConfig)
-            self.cType                      = self.projectConfig['Groups'][gid]['cType']
-            self.Ctype                      = self.cType.capitalize()
-        else :
-            self.cType                      = None
-            self.Ctype                      = None
-
 
 ###############################################################################
 ###################### Macro Package Handling Functions #######################
 ###############################################################################
 ######################## Error Code Block Series = 3000 #######################
 ###############################################################################
+
+
+    def getMacPackIdFromFileName (self, fileName) :
+        '''Return the macPack ID based on the file name'''
+
+        # File name less ext is the ID
+        parts = len(fileName.split('.'))
+        return '.'.join(fileName.split('.')[:parts-1])
+    
+    
+    def getMacPackIdFromSource (self, source) :
+        '''Return the macPack ID based on the complete path and file name.'''
+
+        # Get the file name from the path
+        fileName = self.tools.fName(source)
+        # Return the ID
+        return self.getMacPackIdFromFileName(fileName)
 
 
     def getMacPackConfig (self, macPack) : 
@@ -102,54 +105,76 @@ class Macro (object) :
 # FIXME: We should not be pulling the macPack from inside this function
 # It should be tied to asset management. However, we somehow need to get
 # the xml file from it so for now, we have to install it here.
-        if not os.path.exists(self.local.macPackConfXmlFile) :
+        if not os.path.exists(self.local.macroConfXmlFile) :
             self.addMacPack(macPack)
 
         # Load macPackConfig
-        self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
+        self.macroConfig = self.tools.loadConfig(self.local.macroConfFile, self.local.macroConfXmlFile)
 
 
-    def loadMacPackFunctions (self, macPack) :
-        '''Load the macro package functions that may be used in this module.'''
-
-        # Create an object that contains the macPack functions
-        self.macPackFunctions = UsfmTex(self.layoutConfig)
 
 
-    def addMacPack (self, macPack) :
+
+
+
+
+# FIXME: Is this needed?
+    #def loadMacPackFunctions (self, macPack) :
+        #'''Load the macro package functions that may be used in this module.'''
+
+        ## Create an object that contains the macPack functions
+        #self.macPackFunctions = UsfmTex(self.layoutConfig)
+
+
+    def addMacPack (self, source, cType) :
         '''Add a macro package to the project. It will not work if
-        there already is a macPack present. Remove must be used
+        the same package is already present. Remove must be used
         to get rid of the existing one first.'''
 
 #        import pdb; pdb.set_trace()
 
+        macPackId = self.getMacPackIdFromSource(source)
+        confXml = os.path.join(self.local.projMacroFolder, macPackId, macPackId + '.xml')
+        if not os.path.isfile(source) :
+            self.log.writeToLog(self.errorCodes['3050'], [source])
+
         # Do not add/install if there seems to be a macro package there already
-        if self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] and os.path.exists(self.local.macPackConfFile) :
-            self.log.writeToLog(self.errorCodes['3100'], [macPack])
+        if self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage'] and os.path.exists(self.local.macroConfFile) :
+            self.log.writeToLog(self.errorCodes['3100'], [macPackId])
             return False
 
         # Set the projectConf to the new/same package
-        self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] = macPack
+        self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage'] = macPackId
         self.tools.writeConfFile(self.projectConfig)
 
         # If we got this far, install the a fresh copy of the macPack
-        self.installMacPackOnly(macPack)
+        self.installMacPackOnly(source)
         # Move the style files and custom TeX files out of the macPack
-        self.moveMacStyles()
-        self.moveMacTex()
-        self.macPackConfig = self.tools.initNewConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-        self.log.writeToLog(self.errorCodes['3300'], [macPack, self.local.macPackConfFileName])
+        self.moveMacStyles(macPackId)
+        self.moveMacTex(macPackId)
+
+        # Create a fresh macro.conf file if it dosn't exist
+        if not os.path.isfile(self.local.macroConfFile) :
+            self.macroConfig = self.tools.initNewConfig(self.local.macroConfFile, self.local.macroConfXmlFile)
+        # Inject information from this particular macro package
+        mInfo = self.tools.getXMLSettings(confXml)
+        self.macroConfig['Macros'][macPackId] = mInfo.dict()
+
+        # Save the settings now
+        self.tools.writeConfFile(self.macroConfig)
+
+        self.log.writeToLog(self.errorCodes['3300'], [macPackId, self.local.macroConfFileName])
         
         return True
 
 
-    def moveMacStyles (self) :
+    def moveMacStyles (self, macPackId) :
         '''Move the default macro package styles out of the freshly installed
         project macro package folder to the project Style folder.'''
 
         # Collect the style files to copy
-        for f in self.getMacStyExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
+        for f in self.getMacStyExtFiles(macPackId) :
+            source = os.path.join(os.path.join(self.local.projMacroFolder, macPackId, f))
             target = os.path.join(self.local.projStyleFolder, f)
             self.tools.makedirs(self.local.projStyleFolder)
             # Do not overwrite existing files unless force is used
@@ -165,24 +190,24 @@ class Macro (object) :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
 
 
-    def getMacStyExtFiles (self) :
+    def getMacStyExtFiles (self, macPackId) :
         '''Return a list of macro package style extention files.'''
 
         sFiles = []
-        macPackFiles = os.listdir(self.local.projMacPackFolder)
+        macPackFiles = os.listdir(os.path.join(self.local.projMacroFolder, macPackId))
         for f in macPackFiles :
             if f.split('.')[1].lower() == 'sty' :
                 sFiles.append(f)
         return sFiles
 
 
-    def moveMacTex (self) :
+    def moveMacTex (self, macPackId) :
         '''Move the custom macro package TeX out of the freshly installed
         project macro package folder to the project TeX folder.'''
 
         # Collect the TeX extention files to copy
-        for f in self.getMacTexExtFiles() :
-            source = os.path.join(self.local.projMacPackFolder, f)
+        for f in self.getMacTexExtFiles(macPackId) :
+            source = os.path.join(os.path.join(self.local.projMacroFolder, macPackId, f))
             target = os.path.join(self.local.projTexFolder, f)
             self.tools.makedirs(self.local.projTexFolder)
             # Do not overwrite existing files unless force is used
@@ -195,50 +220,59 @@ class Macro (object) :
                 self.log.writeToLog(self.errorCodes['3310'], [source,self.local.projStyleFolder])
 
 
-    def getMacTexExtFiles (self) :
+    def getMacTexExtFiles (self, macPackId) :
         '''Return a list of macro package TeX extention files.'''
 
         tFiles = []
-        macPackFiles = os.listdir(self.local.projMacPackFolder)
+        macPackFiles = os.listdir(os.path.join(self.local.projMacroFolder, macPackId))
         for f in macPackFiles :
             if f.find('-ext.tex') > 0 :
                 tFiles.append(f)
         return tFiles
 
 
-    def removeMacPack (self, packageId) :
-        '''Remove a macro package from a project. Using this will break a project
-        as installed font information will be lost from the macro config file
-        when it is deleted. Font(s) will need to be reinstalled. However, there
-        may be times this may be necessary. Be careful!'''
+    def removeMacPack (self, cType) :
+        '''Remove the macro package from a component type'''
 
 #        import pdb; pdb.set_trace()
 
-        # Remove the macPack config file if required
-        if os.path.exists(self.local.macPackConfFile) :
-            os.remove(self.local.macPackConfFile)
-            self.log.writeToLog(self.errorCodes['3400'], [self.local.macPackConfFileName])
+        if self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage'] != '' :
+            macPackId = self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage']
+        else :
+            self.log.writeToLog(self.errorCodes['3010'], [cType])
+        # Aquire target to delete
+        target = os.path.join(self.local.projMacroFolder, macPackId)
+
+        # Remove the macPack settings from the config file
+        print self.macroConfig['Macros'][macPackId]
+        del self.macroConfig['Macros'][macPackId]
+        # Save the settings now
+        self.tools.writeConfFile(self.macroConfig)
+        self.log.writeToLog(self.errorCodes['3400'], [macPackId])
 
         # Now remove the macro folder (with all its contents)
-        if os.path.exists(self.local.projMacPackFolder) :
-            shutil.rmtree(self.local.projMacPackFolder)
-            self.log.writeToLog(self.errorCodes['3500'], [packageId])
+        if os.path.exists(target) :
+            shutil.rmtree(target)
+            self.log.writeToLog(self.errorCodes['3500'], [macPackId])
 
-        # Remove the reference for this macro package from any component type
+        # Remove the reference for this macro package from the component type
         # that uses it. Normally that would probably be just be one of them.
-        for comp in self.projectConfig['CompTypes'].keys() :
-            # USFM is the only cType that supports macros at this time
-            if comp == 'USFM' :
-                if self.projectConfig['CompTypes'][comp]['macroPackage'] == packageId :
-                    self.projectConfig['CompTypes'][comp]['macroPackage'] = ''
-                    self.tools.writeConfFile(self.projectConfig)
+        self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage'] = ''
+        self.tools.writeConfFile(self.projectConfig)
 
 
-    def updateMacPack (self, packageId) :
-        '''Update a macro package with the latest version from Rapuma
-        but do not touch the config file.'''
+    def updateMacPack (self, source, cType) :
+        '''Update a macro package with the latest version but do not 
+        touch the config file.'''
 
 #        import pdb; pdb.set_trace()
+
+
+# FIXME: work here on connecting cType to the update process
+        macPackId = self.getMacPackIdFromSource(source)
+        confXml = os.path.join(self.local.projMacroFolder, macPackId, macPackId + '.xml')
+
+
 
         # Be sure we have file names
         self.getMacPackConfig(packageId)
@@ -250,7 +284,7 @@ class Macro (object) :
             shutil.copytree(macDir, macDirBak)
             shutil.rmtree(macDir)
         # Reinstall the macPack
-        if self.installMacPackOnly(packageId) :
+        if self.installMacPackOnly(source) :
             # The current macro system must have a "master" style file.
             # This is a version of the ParaText style file. Because
             # an update might include an update to the style file,
@@ -289,13 +323,15 @@ class Macro (object) :
             return False
 
 
-    def installMacPackOnly (self, package) :
+    def installMacPackOnly (self, source) :
         '''Install the new macro package but only that.'''
 
-        if self.tools.pkgExtract(self.local.rapumaMacPackFile, self.local.projMacroFolder, self.local.macPackConfXmlFile) :
+#        import pdb; pdb.set_trace()
+
+        if self.tools.pkgExtract(source, self.local.projMacroFolder, self.local.macroConfXmlFile) :
             return True
         else :
-            self.log.writeToLog(self.errorCodes['3200'], [package])
+            self.log.writeToLog(self.errorCodes['3200'], [self.tools.fName(source)])
             return False
 
 

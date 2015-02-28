@@ -491,7 +491,7 @@ def userArguments (args) :
         source      = ''
         cType       = ''
         # Check GID
-        if cmd != 'font' :
+        if cmd != 'font' and cmd != 'macro' :
             if not ProjSetup(sysConfig, pid).isGroup(gid) :
                 sys.exit('\nERROR: Group ID is not valid: [' + gid + '] Process halting.\n')
         # Path set and test for existance of file or folder
@@ -516,7 +516,7 @@ def userArguments (args) :
                 sys.exit('\nERROR: File name [' + tools.fName(path) + '] does not appear to be valid. Process halting.\n')
             # Add a font package to the project
             if sub == 'add' :
-                ProjFont(pid).installFont(path, cType)
+                ProjFont(pid).addFont(path, cType)
             # Remove a font from the project (font ID is the file name less .zip extension)
             elif sub == 'remove' :
                 if ProjFont(pid).isFont(packageId) :
@@ -534,18 +534,15 @@ def userArguments (args) :
             elif sub == 'update' :
                 ProjIllustration(pid, gid).updateIllustrationFiles(path)
         elif cmd == 'macro' :
-            # Check here for macro ID
-            if  packageId != 'usfmTex' :
-                sys.exit('\n ERROR: Macro package ID missing or invalid. (Hint, --package_id usfmTex) Only the usfmTex macro package is supported at this time. Though I could write a couple simple lines of code to help make this easier for you, I am choosing to make you type it in to remain consistant with the rest of the CLI. Sorry for any inconvenience this might cause. Process halting.\n')
-            # Add a macro file asset to the project.
+            # Add a macro package asset to a project component type.
             if sub == 'add' :
-                Macro(pid, gid).addMacPack(packageId)
-            # Remove a macro file asset from the project.
+                Macro(pid).addMacPack(path, cType)
+            # Remove a macro package asset from a component type in the project.
             elif sub == 'remove' :
-                Macro(pid, gid).removeMacPack(packageId)
-            # Update a macro file asset in the project.
+                Macro(pid).removeMacPack(cType)
+            # Update a macro package asset in the project.
             elif sub == 'update' :
-                Macro(pid, gid).updateMacPack(packageId)
+                Macro(pid).updateMacPack(path, cType)
         # Work with processing scripts
         elif cmd == 'script' :
             # Set designator or die
@@ -818,7 +815,7 @@ if __name__ == '__main__' :
     pcCmd              = ['component', 'group', 'project']
     pcSubCmd           = ['bind', 'export', 'preprocess', 'postprocess', 'render']
     # Setting
-    stConf             = ['adjustment', 'illustration', 'layout', 'project', 'rapuma', 'usfmTex']
+    stConf             = ['adjustment', 'font', 'illustration', 'layout', 'macro', 'project', 'rapuma']
 
     # Add main arguments (first postion options)
     parser.add_argument('-a', '--about', action='store_true', help = 'Information about Rapuma')

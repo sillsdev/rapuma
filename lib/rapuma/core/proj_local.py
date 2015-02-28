@@ -26,13 +26,20 @@ from rapuma.core.user_config        import UserConfig
 
 class ProjLocal (object) :
 
-    def __init__(self, pid, gid = None, cType = 'usfm', mType = 'book', macPack = 'usfmTex') :
+#    def __init__(self, pid, gid = None, cType = 'usfm', mType = 'book', macPack = 'usfmTex') :
+
+# FIXME: Media type can be found in the general settings of an existing project, change to None
+# cType is found in a group and not needed to start a project, remove from init
+
+    def __init__(self, pid, gid = None, mType = 'book') :
         '''Intitate a class object which contains all the project file folder locations.
         The files and folders are processed by state. If the system is in a state where
         certain parent files or folders do not exist, the child file or folder will be
         set to None. This should only cause problems when certain proecess are attempted
         that should not be given a particular state. For example, a render process should
         fail if a group/component was never added.'''
+
+#        import pdb; pdb.set_trace()
 
         self.tools              = Tools()
         self.pid                = pid
@@ -46,9 +53,8 @@ class ProjLocal (object) :
         self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.projFolders        = []
         self.localDict          = None
-        self.cType              = cType
+        self.macPackId          = None
         self.mType              = mType
-        self.macPack            = macPack
         debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResource, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResource, 'debug')) :
@@ -123,7 +129,7 @@ class ProjLocal (object) :
                                     debugObj.write(item['fileID'] + ' = ' + getattr(self, item['fileID']) + '\n')
 
         # Add configuation file names
-        configFiles = ['project', 'adjustment', 'layout', 'illustration', 'font']
+        configFiles = ['adjustment', 'font', 'illustration', 'layout', 'macro', 'project']
         # Create placeholders for basic conf file names
         for cf in configFiles :
             setattr(self, cf + 'ConfFile', None)
@@ -156,20 +162,20 @@ class ProjLocal (object) :
                     debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName'))) + '\n')
 
         # Add macPack files via a specific macPack XML configuation file
-        if self.macPack and os.path.exists(self.macPackConfXmlFile) :
-            macPackDict = self.tools.xmlFileToDict(self.macPackConfXmlFile)
-            macPackFilesDict = {}
-            for sections in macPackDict['root']['section'] :
-                if sections['sectionID'] == 'Files' :
-                    for section in sections :
-                        secItem = sections[section]
-                        if type(secItem) is list :
-                            for f in secItem :
-                                macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-            for f in macPackFilesDict.keys() :
-                setattr(self, f, macPackFilesDict[f])
-                if debug :
-                    debugObj.write(f + ' = ' + getattr(self, f) + '\n')
+        #if self.macPackId and os.path.exists(self.macroConfXmlFile) :
+            #macPackDict = self.tools.xmlFileToDict(self.macroConfXmlFile)
+            #macPackFilesDict = {}
+            #for sections in macPackDict['root']['section'] :
+                #if sections['sectionID'] == 'Files' :
+                    #for section in sections :
+                        #secItem = sections[section]
+                        #if type(secItem) is list :
+                            #for f in secItem :
+                                #macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+            #for f in macPackFilesDict.keys() :
+                #setattr(self, f, macPackFilesDict[f])
+                #if debug :
+                    #debugObj.write(f + ' = ' + getattr(self, f) + '\n')
 
         # Close the debug file if we need to
         if debug :
@@ -281,7 +287,7 @@ class ProjLocal (object) :
                     yield (found_idx, idx)
 
 
-    def getComponentFiles (self, gid, cid, cType=None) :
+    def getComponentFiles (self, gid, cid, cType) :
         '''Return a dictionary that contains files and paths for a set
         of component files. The path/names are only theoretical and
         need to be tested by the calling function. However, in the case
@@ -290,15 +296,13 @@ class ProjLocal (object) :
 
 #        import pdb; pdb.set_trace()
 
-        if cType :
-            self.cType = cType
         files               = {}
         compFolder          = os.path.join(self.projComponentFolder, cid)
         # Handle USFM text special
-        if self.cType == 'usfm' :
+        if cType == 'usfm' :
             # These are predictable
             fileHandle          = cid + '_base'
-            files['working']    = os.path.join(compFolder, fileHandle + '.' +  self.cType)
+            files['working']    = os.path.join(compFolder, fileHandle + '.' +  cType)
             files['backup']     = files['working'] + '.cv1'
             # Source file may not exist so we will try to find it
             try :
@@ -312,7 +316,7 @@ class ProjLocal (object) :
             except :
                 files['source'] = None
         else :
-            files['working']    = os.path.join(compFolder, cid + '.' +  self.cType)
+            files['working']    = os.path.join(compFolder, cid + '.' +  cType)
             files['backup']     = files['working'] + '.bak'
         
         # Return the dictionary

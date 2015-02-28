@@ -24,8 +24,8 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
-from rapuma.group.usfmTex               import UsfmTex
 
+#from rapuma.group.usfmTex               import UsfmTex
 #from rapuma.project.proj_macro          import Macro
 
 ###############################################################################
@@ -51,15 +51,7 @@ class Config (object) :
         self.layoutConfig                   = None
         self.illustrationConfig             = None
         self.fontConfig                     = None
-        
-# FIXME: I am not comfortable with injecting the macPackConfig here, but
-# this seems to be the only work around for the problem of calling out
-# settings from this config from within this module. Got to get this fixed,
-# the madness must end.
-        try :
-            self.macPackConfig                  = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-        except :
-            pass
+        self.macroConfig                    = None
 
         # Log messages for this module
         self.errorCodes     = {
@@ -129,30 +121,10 @@ class Config (object) :
         self.fontConfig = self.tools.loadConfig(self.local.fontConfFile, self.local.fontConfXmlFile)
 
 
-    #def getMacPackConfig (self, macPack) :
-        #'''Load/return the macPack configuration object. This is handled different from
-        #other configs.'''
+    def getMacroConfig (self) :
+        '''Load/return the macro configuration object.'''
 
-        ## Re/Load the macro package config
-        #self.local = ProjLocal(self.pid, self.gid, self.projectConfig)
-
-
-        #if not os.path.exists(self.local.macPackConfXmlFile) :
-            #self.addMacPack(macPack)
-
-##        import pdb; pdb.set_trace()
-
-        ## Load macPackConfig
-        #self.macPackConfig = self.tools.loadConfig(self.local.macPackConfFile, self.local.macPackConfXmlFile)
-
-
-    #def loadMacPackFunctions (self, macPack) :
-        #'''Load the macro package functions that may be used in this module.'''
-
-        ## Create an object that contains the macPack functions
-## FIXME: This needs to be macPack specific
-##        self.getLayoutConfig()
-        #self.macPackFunctions = UsfmTex(self.layoutConfig)
+        self.macroConfig = self.tools.loadConfig(self.local.macroConfFile, self.local.macroConfXmlFile)
 
 
 ###############################################################################

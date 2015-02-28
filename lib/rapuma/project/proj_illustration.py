@@ -52,12 +52,12 @@ class ProjIllustration (object) :
         self.illustrationConfig         = self.proj_config.illustrationConfig
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.macPack                    = None
-        self.macPackConfig              = None
+        self.macPackId                  = None
+        self.macroConfig                = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPack                = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_macro.getMacPackConfig(self.macPack)
-            self.macPackConfig          = self.proj_macro.macPackConfig
+            self.macPackId              = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.proj_macro.getMacroConfig(self.macPackId)
+            self.macroConfig            = self.proj_macro.macroConfig
         self.log                        = ProjLog(pid)
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
@@ -200,7 +200,7 @@ class ProjIllustration (object) :
         else :
             self.log.writeToLog(self.errorCodes['0010'], [cType])
         
-        cvSep = self.macPackConfig['Illustrations']['chapterVerseSeperator']
+        cvSep = self.macroConfig['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         trueCid = cid
         obj = {}

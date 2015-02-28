@@ -82,13 +82,13 @@ class Xetex (Manager) :
         self.layoutConfig           = self.proj_config.layoutConfig
         self.fontConfig             = self.proj_config.fontConfig
         self.userConfig             = self.project.userConfig
-        self.macPack                = None
-        self.macPackConfig          = None
+        self.macPackId              = None
+        self.macroConfig            = None
         if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPack            = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_macro.getMacPackConfig(self.macPack)
-            self.proj_macro.loadMacPackFunctions(self.macPack)
-            self.macPackConfig      = self.proj_macro.macPackConfig
+            self.macPackId          = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+            self.proj_macro.getMacroConfig(self.macPackId)
+            self.proj_macro.loadMacPackFunctions(self.macPackId)
+            self.macroConfig        = self.proj_macro.macroConfig
             self.macPackFunctions   = self.proj_macro.macPackFunctions
         # Some config settings
         self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
@@ -109,7 +109,7 @@ class Xetex (Manager) :
 
         # Set some Booleans (this comes after persistant values are set)
         self.useHyphenation         = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
-        self.chapNumOffSingChap     = self.tools.str2bool(self.macPackConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
+        self.chapNumOffSingChap     = self.tools.str2bool(self.macroConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
 
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :
@@ -337,7 +337,7 @@ class Xetex (Manager) :
             writeObject.write(self.tools.makeFileHeader(self.local.macSettingsFileName, description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
-            macPackDict = self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
+            macPackDict = self.tools.xmlFileToDict(self.local.macroConfXmlFile)
             for sections in macPackDict['root']['section'] :
                 for section in sections :
                     secItem = sections[section]
@@ -351,7 +351,7 @@ class Xetex (Manager) :
                                 if k == 'texCode' :
                                     if outputTest :
                                         print '\t', setting['key']
-                                    realVal = self.macPackConfig[sections['sectionID']][setting['key']]
+                                    realVal = self.macroConfig[sections['sectionID']][setting['key']]
                                     # Test any boolDepends that this setting might have
                                     if setting.has_key('boolDepend') :
                                         result = []
@@ -380,15 +380,6 @@ class Xetex (Manager) :
                         writeObject.write('\n')
                         for line in linesOut :
                             writeObject.write(line + '\n')
-
-
-
-
-
-
-
-
-#            import pdb; pdb.set_trace()
 
 
             # Continue here with injecting the font settings which are guided by
@@ -585,7 +576,7 @@ class Xetex (Manager) :
         # Dynamically create a dependency list for the render process
         # Note: gidTexFile is remade on every run, do not test against that file
         dep = [self.local.extTexFile, self.local.projectConfFile, self.local.layoutConfFile, 
-                self.local.macPackConfFile, self.local.illustrationConfFile, ]
+                self.local.macroConfFile, self.local.illustrationConfFile, ]
         # Add component dependency files
         for cid in cidList :
             cidUsfm = self.project.groups[gid].getCidPath(cid)

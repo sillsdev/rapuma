@@ -47,24 +47,6 @@ class ProjFont (object) :
         self.proj_config.getFontConfig()
         self.fontConfig                     = self.proj_config.fontConfig
         self.local                          = ProjLocal(pid, self.projectConfig)
-        #self.cType                          = self.projectConfig['Groups'][gid]['cType']
-        #self.Ctype                          = self.cType.capitalize()
-#        import pdb; pdb.set_trace()
-
-# FIXME: Font config work
-# for now we are going to depricate any exsitance of macPackConfig to try to make complete separation
-# of font settings from macro package settings
-        #self.macPack                        = None
-        #self.macPackConfig                  = None
-        #if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            #self.macPack                    = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            #self.proj_macro.getMacPackConfig(self.macPack)
-            #self.proj_macro.loadMacPackFunctions(self.macPack)
-            #self.macPackConfig              = self.proj_macro.macPackConfig
-
-        ## The first time this is initialized make sure we have a FontSettings section
-        #if self.macPackConfig and not self.macPackConfig.has_key('FontSettings') :
-            #self.tools.buildConfSection(self.macPackConfig, 'FontSettings')
 
         # Load all font settings for use in this module
         if self.fontConfig :
@@ -92,10 +74,10 @@ class ProjFont (object) :
             '1241' : ['ERR', 'Font bundle [<<1>>] not found.'],
             '1245' : ['LOG', '<<1>> font setup information added to project config'],
             '1250' : ['ERR', 'The [<<1>>] font is apparently part of this project. Please remove before trying to re-add this font.'],
-            '1260' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
-            '1262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder. - proj_font.installFont()'],
+            '1260' : ['MSG', 'The <<1>> font bundle has been copied into the project font folder.'],
+            '1262' : ['LOG', 'The <<1>> font bundle already exsits in the font folder.'],
             '1265' : ['ERR', 'Failed to extract the [<<1>>] font bundle into the project. Font install process failed.'],
-            '1267' : ['LOG', 'The <<1>> font bundle has been copied into the project font folder. - proj_font.installFont()'],
+            '1267' : ['LOG', 'The <<1>> font bundle has been copied into the project font folder.'],
             '1280' : ['MSG', 'Failed to install the font: [<<1>>] into the project.'],
             '1370' : ['LOG', 'Removed [<<1>>] font name from project component type: [<<2>>].'],
             '1380' : ['MSG', 'Removed the [<<1>>] font from the project.'],
@@ -134,7 +116,6 @@ class ProjFont (object) :
         fileName = self.tools.fName(source)
         # Return the font ID
         return self.getFontIdFromFileName(fileName)
-
 
 
     def recordFont (self, fontId, cType=None) :
@@ -182,11 +163,11 @@ class ProjFont (object) :
             self.log.writeToLog(self.errorCodes['1260'], [self.tools.fName(source)])
             return True
         else :
-            self.log.writeToLog(self.errorCodes['1265'], [fontId], 'proj_font.installFont():1265')
+            self.log.writeToLog(self.errorCodes['1265'], [fontId])
             return False
 
 
-    def installFont (self, source, cType=None) :
+    def addFont (self, source, cType=None) :
         '''It is a three step process to install a font. This will both
         copy in a font and record it in one call. Do not try to 
         install a substitute font. Path is assumed to exsist and contains

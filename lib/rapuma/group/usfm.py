@@ -70,11 +70,11 @@ class Usfm (Group) :
         self.mType                  = project.projectMediaIDCode
         self.renderer               = project.projectConfig['CompTypes'][self.Ctype]['renderer']
         self.sourceEditor           = project.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macPack                = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
+        self.macPackId              = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
         self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
         # Get macro package settings
-        self.proj_macro.getMacPackConfig(self.macPack)
+        self.proj_macro.getMacPackConfig(self.macPackId)
         self.macPackConfig          = self.proj_macro.macPackConfig
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', self.renderer)
@@ -104,29 +104,24 @@ class Usfm (Group) :
         for k, v in self.compSettings.iteritems() :
             setattr(self, k, v)
 
-# FIXME: This needs to go away. Font installation should only happen through
-# the project asset management path
-        # Check if there is a primary font installed
-        #if not self.proj_font.verifyPrimaryFont() :
-            #self.proj_font.installFont('DefaultFont')
-
         # Module Error Codes
         self.errorCodes     = {
-            'USFM-000' : ['MSG', 'Messages for the USFM module.'],
-            'USFM-005' : ['MSG', 'Unassigned error message ID.'],
-            'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
-            'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
-            'USFM-025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
-            'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
-            'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
-            'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
-            'USFM-095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
-            'USFM-100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
-            'USFM-110' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
-            'USFM-120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
-            'USFM-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
-            'USFM-140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
-            'USFM-150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
+
+            #'USFM-000' : ['MSG', 'Messages for the USFM module.'],
+            #'USFM-005' : ['MSG', 'Unassigned error message ID.'],
+            #'USFM-010' : ['ERR', 'Could not process character pair. This error was found: [<<1>>]. Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            #'USFM-020' : ['ERR', 'Improper character pair found: [<<1>>].  Process could not complete. - usfm.pt_tools.getNWFChars()'],
+            #'USFM-025' : ['WRN', 'No non-word-forming characters were found in the PT settings file. - usfm.pt_tools.getNWFChars()'],
+            #'USFM-040' : ['ERR', 'Hyphenation source file not found: [<<1>>]. Process halted!'],
+            #'USFM-080' : ['LOG', 'Normalizing Unicode text to the [<<1>>] form.'],
+            #'USFM-090' : ['ERR', 'USFM file: [<<1>>] did NOT pass the validation test. Because of an encoding conversion, the terminal output is from the file [<<2>>]. Please only edit [<<1>>].'],
+            #'USFM-095' : ['WRN', 'Validation for USFM file: [<<1>>] was turned off.'],
+            #'USFM-100' : ['MSG', 'Source file editor [<<1>>] is not recognized by this system. Please double check the name used for the source text editor setting.'],
+            #'USFM-110' : ['ERR', 'Source file name could not be built because the Name Form ID for [<<1>>] is missing or incorrect. Double check to see which editor created the source text.'],
+            #'USFM-120' : ['ERR', 'Source file: [<<1>>] not found! Cannot copy to project. Process halting now.'],
+            #'USFM-130' : ['ERR', 'Failed to complete preprocessing on component [<<1>>]'],
+            #'USFM-140' : ['MSG', 'Completed installation on [<<1>>] component working text.'],
+            #'USFM-150' : ['ERR', 'Unable to copy [<<1>>] to [<<2>>] - error in text.'],
 
             '0010' : ['LOG', 'Created the [<<1>>] master adjustment file.'],
             '0220' : ['ERR', 'Cannot find: [<<1>>] working file, unable to complete preprocessing for rendering.'],
@@ -224,63 +219,56 @@ class Usfm (Group) :
             if not os.path.isfile(cidUsfm) :
                 self.log.writeToLog(self.errorCodes['0220'], [cidUsfm], 'usfm.preProcessGroup():0220')
             # Add/manage the dependent files for this cid
-            if self.macPack == 'usfmTex' or self.macPack == 'ptx2pdf' :
-                # Component adjustment file
-                cidAdjFile = self.getCidAdjPath(cid)
-                if useManualAdjustments :
-                    self.createCompAdjustmentFile(cid)
-                else :
-                    # If no adjustments, remove any exsiting file
-                    if os.path.isfile(cidAdjFile) :
-                        os.remove(cidAdjFile)
-                # Component piclist file
-                cidPiclistFile = self.proj_illustration.getCidPiclistFile(cid)
-                if useIllustrations :
-                    if self.proj_illustration.hasIllustrations(cid) :
-                        # Check for missing illustrations (die here if not found)
+
+# FIXME: Some changes may be needed here to guide creation of adjustment files
+            # Component adjustment file
+            cidAdjFile = self.getCidAdjPath(cid)
+            if useManualAdjustments :
+                self.createCompAdjustmentFile(cid)
+            else :
+                # If no adjustments, remove any exsiting file
+                if os.path.isfile(cidAdjFile) :
+                    os.remove(cidAdjFile)
+            # Component piclist file
+            cidPiclistFile = self.proj_illustration.getCidPiclistFile(cid)
+            if useIllustrations :
+                if self.proj_illustration.hasIllustrations(cid) :
+                    # Check for missing illustrations (die here if not found)
 
 #                        import pdb; pdb.set_trace()
 
 
-                        if self.proj_illustration.missingIllustrations(cid) :
-                            self.log.writeToLog(self.errorCodes['0300'])
+                    if self.proj_illustration.missingIllustrations(cid) :
+                        self.log.writeToLog(self.errorCodes['0300'])
 
 
 
 
-                        # Create piclist file if not there or if the config has changed
-                        if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
-                            # Now make a fresh version of the piclist file
-                            if self.proj_illustration.createPiclistFile(cid) :
-                                self.log.writeToLog(self.errorCodes['0260'], [cid])
-                            else :
-                                self.log.writeToLog(self.errorCodes['0265'], [cid])
+                    # Create piclist file if not there or if the config has changed
+                    if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
+                        # Now make a fresh version of the piclist file
+                        if self.proj_illustration.createPiclistFile(cid) :
+                            self.log.writeToLog(self.errorCodes['0260'], [cid])
                         else :
-                            for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
-                                if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
-                                    # Remake the piclist file
-                                    if self.proj_illustration.createPiclistFile(cid) :
-                                        self.log.writeToLog(self.errorCodes['0260'], [cid])
-                                    else :
-                                        self.log.writeToLog(self.errorCodes['0265'], [cid])
+                            self.log.writeToLog(self.errorCodes['0265'], [cid])
                     else :
-                        # Does not seem to be any illustrations for this cid
-                        # clean out any piclist file that might be there
-                        if os.path.isfile(cidPiclistFile) :
-                            os.remove(cidPiclistFile)
+                        for f in [self.local.layoutConfFile, self.local.illustrationConfFile] :
+                            if self.tools.isOlder(cidPiclistFile, f) or not os.path.isfile(cidPiclistFile) :
+                                # Remake the piclist file
+                                if self.proj_illustration.createPiclistFile(cid) :
+                                    self.log.writeToLog(self.errorCodes['0260'], [cid])
+                                else :
+                                    self.log.writeToLog(self.errorCodes['0265'], [cid])
                 else :
-                    # If we are not using illustrations then any existing piclist file will be removed
+                    # Does not seem to be any illustrations for this cid
+                    # clean out any piclist file that might be there
                     if os.path.isfile(cidPiclistFile) :
                         os.remove(cidPiclistFile)
-                        self.log.writeToLog(self.errorCodes['0255'], [cid])
-
-
-# FIXME: This error message is all wrong.
-
-
-
             else :
-                self.log.writeToLog(self.errorCodes['0220'], [self.macPack], 'usfm.preProcessGroup():0220')
+                # If we are not using illustrations then any existing piclist file will be removed
+                if os.path.isfile(cidPiclistFile) :
+                    os.remove(cidPiclistFile)
+                    self.log.writeToLog(self.errorCodes['0255'], [cid])
 
         # Any more stuff to run?
 
