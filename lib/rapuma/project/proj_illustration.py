@@ -22,7 +22,6 @@ import os, shutil, codecs
 from rapuma.core.tools              import Tools
 from rapuma.manager.manager         import Manager
 from rapuma.project.proj_config     import Config
-from rapuma.project.proj_macro      import Macro
 from rapuma.core.proj_local         import ProjLocal
 from rapuma.core.proj_log           import ProjLog
 from rapuma.core.user_config        import UserConfig
@@ -43,7 +42,6 @@ class ProjIllustration (object) :
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
         self.proj_config                = Config(pid, gid)
-        self.proj_macro                 = Macro(pid, gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
         self.proj_config.getIllustrationConfig()
@@ -52,12 +50,6 @@ class ProjIllustration (object) :
         self.illustrationConfig         = self.proj_config.illustrationConfig
         self.cType                      = self.projectConfig['Groups'][gid]['cType']
         self.Ctype                      = self.cType.capitalize()
-        self.macPackId                  = None
-        self.macroConfig                = None
-        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPackId              = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_macro.getMacroConfig(self.macPackId)
-            self.macroConfig            = self.proj_macro.macroConfig
         self.log                        = ProjLog(pid)
         self.backgroundTypes            = ['watermark', 'lines']
         # Get some config settings
@@ -192,6 +184,11 @@ class ProjIllustration (object) :
 
 #        import pdb; pdb.set_trace()
 
+        # Right now, this is the only place we need the macroConfig so
+        # we will just make it local for now
+        self.proj_config.getMacroConfig()
+        macroConfig = self.proj_config.macroConfig
+
         cType = self.projectConfig['Groups'][self.gid]['cType']
         if cType == 'usfm' :
             piclistFile = self.getCidPiclistFile(cid)
@@ -199,8 +196,9 @@ class ProjIllustration (object) :
             piclistFile = self.getCidPiclistFile(self.gid)
         else :
             self.log.writeToLog(self.errorCodes['0010'], [cType])
-        
-        cvSep = self.macroConfig['Illustrations']['chapterVerseSeperator']
+
+        macPackId = self.projectConfig['CompTypes'][cType.capitalize()]['macroPackage']
+        cvSep = macroConfig['Macros'][macPackId]['Illustrations']['chapterVerseSeperator']
         thisRef = ''
         trueCid = cid
         obj = {}

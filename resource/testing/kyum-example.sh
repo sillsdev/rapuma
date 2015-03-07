@@ -28,14 +28,20 @@ set -v
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group FOURTEES --comp_type usfm
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group GOSPEL --comp_type usfm
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST group add --group FRONT --comp_type pdf
-# Bind order
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FRONT --key bindingOrder --value 1
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key bindingOrder --value 2
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key bindingOrder --value 3
 
 
-
-## ASSET MANAGEMENT: Preprocess script
+## ASSET MANAGEMENT: Macros, Fonts, and Preprocess scripts
+# Macros
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150228.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro remove --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --path ~/Publishing/my_source/assets/macros/usfmTex_20150225.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro update --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150228.zip --component_type usfm
+# Fonts
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Charis\ SIL_4.106.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font remove --package_id "Charis SIL_4.106"
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font update --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip
+# Scripts
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST script add --group GOSPEL --path ~/Publishing/my_source/KYUM/process/kyum_textPreprocess.py --preprocess
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST script update --group GOSPEL --path ~/Publishing/my_source/KYUM/updates/kyum_textPreprocess-v2.py --preprocess
 # Turn on preprocessing
@@ -53,20 +59,7 @@ set -v
 ~/Projects/rapuma/scripts/rapuma content KYU-MYMR-KYUMTEST component update --group FRONT --cid_list "title" --path ~/Publishing/my_source/KYUM/updates
 
 
-## ASSET MANAGEMENT
-# Macros
-
-
-#~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro update --group GOSPEL --package_id usfmTex
-#~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro remove --group GOSPEL --package_id usfmTex
-#~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --group GOSPEL --package_id usfmTex
-
-
-# Fonts
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Charis\ SIL_4.106.zip
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --group GOSPEL --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip --component_type usfm
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font remove --package_id "Charis SIL_4.106"
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font update --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip
+## ASSET MANAGEMENT: Macros and Fonts
 # Illustrations
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST illustration add --group GOSPEL --path ~/Publishing/my_source/assets/illustrations
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST illustration remove --group GOSPEL  
@@ -75,16 +68,20 @@ set -v
 
 
 ## SETTINGS
+# Bind order
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FRONT --key bindingOrder --value 1
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key bindingOrder --value 2
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key bindingOrder --value 3
 # General
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/TeXBehavior --key vFuzz --value 4.8pt
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/TeXBehavior --key vFuzz --value 4.8pt
 # Illustrations
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key useIllustrations --value True
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key useFigurePlaceHolders --value False
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST illustration --section GOSPEL/lb00135 --key position --value br
 # Font
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/FontSettings --key useRenderingSystem --value GR
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/FontSettings --key useLanguage --value kyu
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/FontSettings --key useMapping --value kye_renumber
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST font --section GeneralSettings --key useRenderingSystem --value GR
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST font --section GeneralSettings --key useLanguage --value kyu
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST font --section GeneralSettings --key useMapping --value kye_renumber
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section TextElements --key bodyFontSize --value 9
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section TextElements --key bodyTextLeading --value 13
 # Print output
@@ -94,14 +91,14 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key docInfoText --value "Rapuma Test Render"
 # Columns
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key columnGutterRule --value True
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/Columns --key columnGutterFactor --value 20
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/Columns --key columnGutterRuleSkip --value 4
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Columns --key columnGutterFactor --value 20
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Columns --key columnGutterRuleSkip --value 4
 # Verse number display
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/ChapterVerse --key useMarginalVerses --value True
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/ChapterVerse --key useMarginalVerses --value True
 # Binding
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key startPageNumber --value 274
 # Footnotes
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section usfmTex_20150225/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
 
 ## RENDERING
 # Turn off PDF viewing to avoid screen clutter

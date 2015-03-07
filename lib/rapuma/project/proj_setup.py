@@ -39,18 +39,27 @@ from rapuma.group.usfm_data                 import UsfmData
 
 class ProjSetup (object) :
 
-    def __init__(self, sysConfig, pid) :
+    def __init__(self, sysConfig, pid, gid=None) :
         '''Initiate the whole class and create the object.'''
 
         self.pid                            = pid
+        self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
         self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(self.pid)
         self.systemVersion                  = sysConfig['Rapuma']['systemVersion']
-        self.projectConfig                  = self.loadUpProjConfig(self.pid)
-        self.local                          = ProjLocal(self.pid)
+        self.projectConfig                  = self.loadUpProjConfig(self.pid, self.gid)
+        # Just in case no groups have been input yet
+        if self.gid :
+            try :
+                cType                       = self.projectConfig['Groups'][self.gid]['cType']
+                self.local                  = ProjLocal(self.pid, self.gid, cType)
+            except :
+                self.local                  = ProjLocal(self.pid)
+        else :
+            self.local                      = ProjLocal(self.pid)
         self.groups                         = {}
         self.usfmData                       = UsfmData()
         self.ntCidList                      = self.usfmData.ntCidList()
@@ -150,10 +159,10 @@ class ProjSetup (object) :
         }
 
 
-    def loadUpProjConfig (self, pid) :
+    def loadUpProjConfig (self, pid, gid) :
         '''Load up the project config.'''
 
-        self.proj_config        = Config(pid)
+        self.proj_config        = Config(pid, gid)
         self.proj_config.getProjectConfig()
         return self.proj_config.projectConfig
 
@@ -698,7 +707,7 @@ class ProjSetup (object) :
             self.tools.makeReadOnly(compFiles['source'])
 
         # To be sure nothing happens, copy from our project source
-        # backup file. (Is self.style.defaultStyFile the best thing?)
+        # backup file. (Is self.local.defaultStyFile the best thing?)
         if self.usfmCopy(compFiles['source'], compFiles['working'], gid) :
             # Run any working text preprocesses on the new component text
             if usePreprocessScript :
@@ -825,10 +834,7 @@ class ProjSetup (object) :
         # For future reference, the sfm parser will fail if TeX style
         # comment markers "%" are used to comment text rather than "#".
 
-        # Grab the default style file from the macPack (it better be there)
-        cType           = self.projectConfig['Groups'][gid]['cType']
-        Ctype           = cType.capitalize()
-        macPack         = self.projectConfig['CompTypes'][Ctype]['macroPackage']
+        # Grab the default style file from the style foldern
         try :
             fh = codecs.open(source, 'rt', 'utf_8_sig')
             stylesheet = usfm.default_stylesheet.copy()

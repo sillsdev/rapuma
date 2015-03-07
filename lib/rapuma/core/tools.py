@@ -277,9 +277,41 @@ class Tools (object) :
         This is necessary primarily because I have not found a way to preserve
         permissions of the files comming out of a zip archive. To make sure the
         processing script will actually work when it needs to run. Changing the
-        permissions to 777 may not be the best way but it will work for now. '''
+        permissions to 777 may not be the best way but it will work for now. To
+        test for success, we will return True if all goes well.'''
 
-        os.chmod(fileName, int("0777", 8))
+        try :
+            os.chmod(fileName, int("0777", 8))
+            return True
+        except Exception as e :
+            print 'tools.makeExecutable() failed with: ' + str(e)
+            return False
+
+
+    def removeFile (self, target) :
+        '''This will use os.remove() to do the work but if an error occures
+        it will print the error and return false, allowing the process to
+        continue. This maybe needed in some cases.'''
+        
+        try :
+            os.remove(target)
+            return True
+        except Exception as e :
+            print 'tools.removeFile() failed with: ' + str(e)
+            return False
+
+
+    def renameFile (self, old, new) :
+        '''This will use os.rename() to do a file rename but if an error
+        occures it will print the error and return false, allowing the 
+        process to continue. This maybe needed in some cases.'''
+        
+        try :
+            os.rename(old, new)
+            return True
+        except Exception as e :
+            print 'tools.renameFile() failed with: ' + str(e)
+            return False
 
 
     def fixExecutables (self, scriptDir) :

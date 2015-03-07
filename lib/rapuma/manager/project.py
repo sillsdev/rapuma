@@ -46,11 +46,7 @@ class Project (object) :
         self.projectConfig          = self.config.projectConfig
         self.cType                  = self.projectConfig['Groups'][self.gid]['cType']
         self.Ctype                  = self.cType.capitalize()
-# FIXME: Depricate?
-        #self.macPackId              = ''
-        #if self.cType == 'usfm' :
-            #self.macPackId          = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-        self.local                  = ProjLocal(pid, gid, self.projectConfig)
+        self.local                  = ProjLocal(pid, gid, self.cType)
         self.log                    = ProjLog(self.pid)
         self.tools                  = Tools()
         self.groups                 = {}

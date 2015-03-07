@@ -393,12 +393,12 @@ def userArguments (args) :
         path        = ''
         # Test the GID for use in component or group level commands
         if cmd == 'component' or cmd == 'group' :
-            if not ProjSetup(sysConfig, pid).isGroup(gid) :
+            if not ProjSetup(sysConfig, pid, gid).isGroup(gid) :
                 if not sub == 'add' :
                     sys.exit('\nERROR: Group ID [' + path + '] is not valid. Process halting.\n')
         # For some processes we need to have the cType
         if not cType :
-            cType = ProjSetup(sysConfig, pid).returnConfigValue('project', 'Groups/' + gid, 'cType')
+            cType = ProjSetup(sysConfig, pid, gid).returnConfigValue('project', 'Groups/' + gid, 'cType')
         # Check source path if there is one
         if args.path :
             path = os.path.abspath(args.path)
@@ -450,10 +450,10 @@ def userArguments (args) :
         if cmd == 'group' :
             if sub == 'add' :
                 # Add a group (no components)
-                ProjSetup(sysConfig, pid).addGroup(cType, gid)
+                ProjSetup(sysConfig, pid, gid).addGroup(cType, gid)
             elif sub == 'remove' :
                 # Remove a group (all of it)
-                ProjSetup(sysConfig, pid).removeGroup(gid)
+                ProjSetup(sysConfig, pid, gid).removeGroup(gid)
                 # Clean up the helper scripts too
                 if tools.str2bool(uc.userConfig['System']['autoHelperScripts']) :
                     ProjCommander(pid).removeScripts()
@@ -463,16 +463,16 @@ def userArguments (args) :
         elif cmd == 'component' :
             if sub == 'add' :
                 # Add one or more components in a group (will not overwrite)
-                ProjSetup(sysConfig, pid).addComponent(gid, source_list)
+                ProjSetup(sysConfig, pid, gid).addComponent(gid, source_list)
             elif sub == 'compare' :
                 tools.terminal('\nCompare the current component working text with the previous version. \n')
                 sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
             elif sub == 'remove' :
                 # Remove one or more components from a group
-                ProjSetup(sysConfig, pid).removeComponents(gid, source_list)
+                ProjSetup(sysConfig, pid, gid).removeComponents(gid, source_list)
             elif sub == 'update' :
                 # Update one or more components in a group
-                ProjSetup(sysConfig, pid).updateComponents(gid, source_list)
+                ProjSetup(sysConfig, pid, gid).updateComponents(gid, source_list)
             else :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
 
@@ -525,7 +525,7 @@ def userArguments (args) :
                     sys.exit('\n Sorry to say, but the font package ID you provided ' + packageId + ' does not match any fonts in the project. I have to stop now but please come back and try again.\n')
             # Update a font in the project
             elif sub == 'update' :
-                ProjFont(pid).updateFontPack(path)
+                ProjFont(pid).updateFontPack(path, cType)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 ProjIllustration(pid, gid).addIllustrationFiles(path)
@@ -536,13 +536,13 @@ def userArguments (args) :
         elif cmd == 'macro' :
             # Add a macro package asset to a project component type.
             if sub == 'add' :
-                Macro(pid).addMacPack(path, cType)
+                Macro(pid, cType).addMacPack(path)
             # Remove a macro package asset from a component type in the project.
             elif sub == 'remove' :
-                Macro(pid).removeMacPack(cType)
+                Macro(pid, cType).removeMacPack()
             # Update a macro package asset in the project.
             elif sub == 'update' :
-                Macro(pid).updateMacPack(path, cType)
+                Macro(pid, cType).updateMacPack(path)
         # Work with processing scripts
         elif cmd == 'script' :
             # Set designator or die

@@ -164,7 +164,6 @@ Todo:
             <folderPath>[self:projHome][pathSep]Macro</folderPath>
             <relies>projHome</relies>
         </folder>
-<!--
         <folder>
             <name>Project Macro Package Folder</name>
             <description>The folder where a specific macro package is found.</description>
@@ -172,7 +171,6 @@ Todo:
             <folderPath>[self:projMacroFolder][pathSep][self:macPackId]</folderPath>
             <relies></relies>
         </folder>
--->
         <folder>
             <name>Project Font Folder</name>
             <description>The folder where all the fonts for a project are kept.</description>
@@ -204,17 +202,6 @@ Todo:
         <name>Files</name>
         <sectionID>Files</sectionID>
         <description>Key files created and used by Rapuma.</description>
-<!--
-        <file>
-            <name>Macro Package XML Configuration File</name>
-            <description>The main XML configuration file for a macro package.</description>
-            <fileID>macroConfXmlFile</fileID>
-            <fileName>[self:macPackId].xml</fileName>
-            <filePath>[self:projMacroFolder][pathSep][self:macPackId]</filePath>
-            <depends></depends>
-            <relies></relies>
-        </file>
--->
         <file>
             <name>Project Macro Configuration File</name>
             <description>The project macro configuation file.</description>
@@ -224,20 +211,15 @@ Todo:
             <depends></depends>
             <relies></relies>
         </file>
-
-<!--
         <file>
-            <name>Rapuma Macro Package File Name</name>
-            <description>The Rapuma macro package file (Zipped).</description>
-            <fileID>rapumaMacroFile</fileID>
-            <fileName>[self:macPackId].zip</fileName>
-            <filePath>[self:rapumaMacroFolder][pathSep]</filePath>
+            <name>Macro Package Configuration Default XML File</name>
+            <description>The XML default configuation file for the current macro package.</description>
+            <fileID>macPackConfXmlFile</fileID>
+            <fileName>[self:macPackId].xml</fileName>
+            <filePath>[self:projMacPackFolder]</filePath>
             <depends></depends>
-            <relies></relies>
+            <relies>cType</relies>
         </file>
--->
-
-
 
 
 <!--        <file>-->
@@ -268,13 +250,21 @@ Todo:
             <depends>projectConfFile,adjustmentConfFile,illustrationConfFile,layoutConfFile,macroConfFile,fontConfFile,extTexFile,grpExtTexFile,glbExtStyFile,grpExtStyFile</depends>
             <relies>gid</relies>
         </file>
-
         <file>
             <name>Pre-Style Extension File</name>
             <description>This file contains TeX macro extentions. The extensions in this file need to be loaded before styles and style extensions are loaded.</description>
             <fileID>preStyTexExtFile</fileID>
-            <fileName>preSty-ext.tex</fileName>
+            <fileName>[self:macPackId]_preSty-ext.tex</fileName>
             <filePath>[self:projTexFolder]</filePath>
+            <depends></depends>
+            <relies></relies>
+        </file>
+        <file>
+            <name>Primary Macro Package File</name>
+            <description>The main macro file for the package. Other extension files will be loaded after this one.</description>
+            <fileID>primaryMacroFile</fileID>
+            <fileName>[self:macPackId].tex</fileName>
+            <filePath>[self:projMacPackFolder]</filePath>
             <depends></depends>
             <relies></relies>
         </file>
@@ -282,17 +272,16 @@ Todo:
             <name>Main Settings File</name>
             <description>The main settings file that TeX will link to after the main macro file is loaded. These settings will add to or modify defaults set.</description>
             <fileID>macSettingsFile</fileID>
-            <fileName>settings.tex</fileName>
+            <fileName>[self:macPackId]_settings.tex</fileName>
             <filePath>[self:projTexFolder]</filePath>
             <depends>layoutConfFile,macroConfFile,fontConfFile</depends>
             <relies></relies>
         </file>
-
         <file>
             <name>Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the main settings file is loaded. These settings will add to or modify previous settings.</description>
             <fileID>extTexFile</fileID>
-            <fileName>extension.tex</fileName>
+            <fileName>[self:macPackId]_ext.tex</fileName>
             <filePath>[self:projTexFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -301,7 +290,7 @@ Todo:
             <name>Group Settings Extension File</name>
             <description>The settings extension file that TeX will link to after the extensions settings file is loaded. These settings will add to or modify previous settings.</description>
             <fileID>grpExtTexFile</fileID>
-            <fileName>[self:gid]-extension.tex</fileName>
+            <fileName>[self:gid]_ext.tex</fileName>
             <filePath>[self:projTexFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -310,7 +299,7 @@ Todo:
             <name>Global Styles</name>
             <description>This is the file that contains all global style settings for the project.</description>
             <fileID>defaultStyFile</fileID>
-            <fileName>default.sty</fileName>
+            <fileName>[self:macPackId].sty</fileName>
             <filePath>[self:projStyleFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -319,7 +308,7 @@ Todo:
             <name>Extension Styles</name>
             <description>This is the file that contains all extension style settings for the project.</description>
             <fileID>glbExtStyFile</fileID>
-            <fileName>extension.sty</fileName>
+            <fileName>[self:macPackId]_ext.sty</fileName>
             <filePath>[self:projStyleFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -328,7 +317,7 @@ Todo:
             <name>Group Styles</name>
             <description>This is the file that contains all the style settings for the current group.</description>
             <fileID>grpExtStyFile</fileID>
-            <fileName>[self:gid]-extension.sty</fileName>
+            <fileName>[self:gid]_ext.sty</fileName>
             <filePath>[self:projStyleFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -337,7 +326,7 @@ Todo:
             <name>TeX lccode Definition File</name>
             <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
             <fileID>lccodeTexFile</fileID>
-            <fileName>[self:gid]-lccode.tex</fileName>
+            <fileName>[self:gid]_lccode.tex</fileName>
             <filePath>[self:projGidFolder]</filePath>
             <depends></depends>
             <relies></relies>
@@ -347,13 +336,12 @@ Todo:
             <name>TeX Group Hyphenation Exclusions File</name>
             <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
             <fileID>grpHyphExcTexFile</fileID>
-            <fileName>[self:gid]-hyphenation.tex</fileName>
+            <fileName>[self:gid]_hyphenation.tex</fileName>
             <filePath>[self:projGidFolder]</filePath>
             <depends></depends>
             <relies></relies>
             <note>This file is located in the component group folder to allow more segregated processing.</note>
         </file>
-
         <file>
             <name>Rapuma Preprocess Script File</name>
             <description>The default script stored in the Rapuma system that will be used to preprocess the group (component) text.</description>
@@ -363,7 +351,6 @@ Todo:
             <depends></depends>
             <relies></relies>
         </file>
-
         <file>
             <name>Background File</name>
             <description>The file that provides a background for the rendered output, if desired. This will contain various components like cropmarks, lines and watermark.</description>
@@ -373,7 +360,6 @@ Todo:
             <depends></depends>
             <relies></relies>
         </file>
-
         <file>
             <name>Diagnostic Transparency File</name>
             <description>The file that provides diagnostic components on a transparency layer that will be superimposed over the page contents for diagnostic purposes, if desired.</description>

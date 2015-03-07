@@ -188,10 +188,12 @@ class ProjFont (object) :
             return False
 
 
-    def updateFontPack (self, source) :
+    def updateFontPack (self, source, cType=None) :
         '''Update a font package but do not change any of the existing
         settings. If there are setting issues (changes) it would be
-        best to remove, then reinstall.'''
+        best to remove, then reinstall. A potential confusion point
+        is that updating a font normally means changing the ID. Then
+        updating actually becomes just installing a font.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -204,6 +206,10 @@ class ProjFont (object) :
                 shutil.rmtree(os.path.join(self.local.projFontFolder, fontId))
             # Bring in a fresh copy
             if self.copyInFont(source) :
+                # If a component type was specified, record that as well
+                if cType :
+                    self.projectConfig['CompTypes'][cType.capitalize()]['fontName'] = fontId
+                    self.tools.writeConfFile(self.projectConfig)
                 self.log.writeToLog(self.errorCodes['1237'], [fontId])
                 return True
 
@@ -222,10 +228,12 @@ class ProjFont (object) :
             # If so, remove it.
             found = 0
             for cType in self.projectConfig['CompTypes'].keys() :
-                if self.projectConfig['CompTypes'][cType.capitalize()]['fontName'] == fontId :
-                    self.projectConfig['CompTypes'][cType.capitalize()]['fontName'] = ''
-                    self.log.writeToLog(self.errorCodes['1370'], [fontId, cType])
-                    found +=1
+                # It might be possible that the cType has no font settings, so we check
+                if self.projectConfig['CompTypes'][cType.capitalize()].has_key('fontName') :
+                    if self.projectConfig['CompTypes'][cType.capitalize()]['fontName'] == fontId :
+                        self.projectConfig['CompTypes'][cType.capitalize()]['fontName'] = ''
+                        self.log.writeToLog(self.errorCodes['1370'], [fontId, cType])
+                        found +=1
             if found > 0 :
                 self.tools.writeConfFile(self.projectConfig)
 

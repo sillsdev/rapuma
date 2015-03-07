@@ -160,19 +160,16 @@ class ProjCommander (object) :
 
 #        import pdb; pdb.set_trace()
 
-        # Load local versions of the macPack config
         # Set the vars for this function
         pid                 = self.pid
         cType               = self.projectConfig['Groups'][gid]['cType']
         Ctype               = cType.capitalize()
         renderer            = self.projectConfig['CompTypes'][Ctype]['renderer']
-        macPack             = self.projectConfig['CompTypes'][Ctype]['macroPackage']
         self.proj_macro     = Macro(self.pid, gid)
-        self.proj_macro.getMacPackConfig(macPack)
-        macPackConfig       = self.proj_macro.macPackConfig
+        macroConfig         = self.proj_macro.macroConfig
         font                = ''
-        if macPackConfig and macPackConfig['FontSettings'].has_key('primaryFont') :
-            font            = macPackConfig['FontSettings']['primaryFont']
+        if macroConfig and macroConfig['FontSettings'].has_key('primaryFont') :
+            font            = macroConfig['FontSettings']['primaryFont']
         macro               = self.projectConfig['CompTypes'][Ctype]['macroPackage']
         mid                 = self.projectMediaIDCode
         # Return a dictionary of all the commands we generate

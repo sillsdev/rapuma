@@ -26,7 +26,6 @@ from rapuma.group.group                 import Group
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_config         import Config
-from rapuma.project.proj_macro          import Macro
 from rapuma.project.proj_background     import ProjBackground
 
 
@@ -60,7 +59,6 @@ class Usfm (Group) :
         self.proj_font              = ProjFont(self.pid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
-        self.proj_macro             = Macro(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getAdjustmentConfig()
         self.projectConfig          = self.proj_config.projectConfig
@@ -73,9 +71,6 @@ class Usfm (Group) :
         self.macPackId              = project.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # Get the comp settings
         self.compSettings           = project.projectConfig['CompTypes'][self.Ctype]
-        # Get macro package settings
-        self.proj_macro.getMacPackConfig(self.macPackId)
-        self.macPackConfig          = self.proj_macro.macPackConfig
         # Build a tuple of managers this component type needs to use
         self.usfmManagers = ('text', self.renderer)
 
@@ -234,16 +229,8 @@ class Usfm (Group) :
             if useIllustrations :
                 if self.proj_illustration.hasIllustrations(cid) :
                     # Check for missing illustrations (die here if not found)
-
-#                        import pdb; pdb.set_trace()
-
-
                     if self.proj_illustration.missingIllustrations(cid) :
                         self.log.writeToLog(self.errorCodes['0300'])
-
-
-
-
                     # Create piclist file if not there or if the config has changed
                     if not os.path.isfile(cidPiclistFile) or self.tools.isOlder(cidPiclistFile, self.local.illustrationConfFile) :
                         # Now make a fresh version of the piclist file

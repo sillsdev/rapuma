@@ -53,7 +53,7 @@ Todo:
         <key>macroPackage</key>
         <description>The macro package the XeTeX rendering engine will use to render components.</description>
         <type>string</type>
-        <value>usfmTex</value>
+        <value></value>
     </setting>
     <setting>
         <name>Font Name</name>

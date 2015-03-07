@@ -66,11 +66,11 @@ class Xetex (Manager) :
         self.managers               = project.managers
         self.pg_back                = ProjBackground(self.pid, self.gid)
         self.fmt_diagnose           = ProjDiagnose(self.pid, self.gid)
-        self.proj_macro             = Macro(self.pid, self.gid)
         self.proj_config            = Config(self.pid, self.gid)
         self.proj_config.getProjectConfig()
         self.proj_config.getLayoutConfig()
         self.proj_config.getFontConfig()
+        self.proj_config.getMacroConfig()
         # Bring in some manager objects we will need
         self.proj_font              = ProjFont(self.pid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
@@ -81,20 +81,13 @@ class Xetex (Manager) :
         self.projectConfig          = self.proj_config.projectConfig
         self.layoutConfig           = self.proj_config.layoutConfig
         self.fontConfig             = self.proj_config.fontConfig
+        self.macroConfig            = self.proj_config.macroConfig
         self.userConfig             = self.project.userConfig
-        self.macPackId              = None
-        self.macroConfig            = None
-        if self.projectConfig['CompTypes'][self.Ctype].has_key('macroPackage') and self.projectConfig['CompTypes'][self.Ctype]['macroPackage'] != '' :
-            self.macPackId          = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
-            self.proj_macro.getMacroConfig(self.macPackId)
-            self.proj_macro.loadMacPackFunctions(self.macPackId)
-            self.macroConfig        = self.proj_macro.macroConfig
-            self.macPackFunctions   = self.proj_macro.macPackFunctions
+        self.macPackId              = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # Some config settings
         self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
         self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
-        self.macroPackage           = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
         self.useDiagnostic          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic'])
         self.useDocInfo             = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
@@ -108,9 +101,13 @@ class Xetex (Manager) :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
-        self.useHyphenation         = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
-        self.chapNumOffSingChap     = self.tools.str2bool(self.macroConfig['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
-
+        # In case the macro is not installed we need to skip over this
+        try :
+            self.useHyphenation         = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
+            self.chapNumOffSingChap     = self.tools.str2bool(self.macroConfig['Macros'][self.macPackId]['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
+        except :
+            self.useHyphenation         = None
+            self.chapNumOffSingChap     = None
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :
             os.makedirs(self.local.projGidFolder)
@@ -337,7 +334,11 @@ class Xetex (Manager) :
             writeObject.write(self.tools.makeFileHeader(self.local.macSettingsFileName, description))
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
-            macPackDict = self.tools.xmlFileToDict(self.local.macroConfXmlFile)
+            macPackDict = self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
+
+#            import pdb; pdb.set_trace()
+
+
             for sections in macPackDict['root']['section'] :
                 for section in sections :
                     secItem = sections[section]
@@ -351,7 +352,7 @@ class Xetex (Manager) :
                                 if k == 'texCode' :
                                     if outputTest :
                                         print '\t', setting['key']
-                                    realVal = self.macroConfig[sections['sectionID']][setting['key']]
+                                    realVal = self.macroConfig['Macros'][self.macPackId][sections['sectionID']][setting['key']]
                                     # Test any boolDepends that this setting might have
                                     if setting.has_key('boolDepend') :
                                         result = []
@@ -423,6 +424,8 @@ class Xetex (Manager) :
         '''Return the value of a given config reference. The ref syntax is
         as follows: [config:configObj|section|key]. This should be able to
         recuse as deep as necessary.'''
+
+#        import pdb; pdb.set_trace()
 
         ref = ref.lstrip('[').rstrip(']')
         (holderType, holderKey) = ref.split(':', 1)

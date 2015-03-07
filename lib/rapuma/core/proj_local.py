@@ -24,6 +24,7 @@ from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 
 
+
 class ProjLocal (object) :
 
 #    def __init__(self, pid, gid = None, cType = 'usfm', mType = 'book', macPack = 'usfmTex') :
@@ -31,7 +32,7 @@ class ProjLocal (object) :
 # FIXME: Media type can be found in the general settings of an existing project, change to None
 # cType is found in a group and not needed to start a project, remove from init
 
-    def __init__(self, pid, gid = None, mType = 'book') :
+    def __init__(self, pid, gid=None, cType=None, mType='book') :
         '''Intitate a class object which contains all the project file folder locations.
         The files and folders are processed by state. If the system is in a state where
         certain parent files or folders do not exist, the child file or folder will be
@@ -55,6 +56,27 @@ class ProjLocal (object) :
         self.localDict          = None
         self.macPackId          = None
         self.mType              = mType
+        self.cType              = cType
+
+# FIXME: The if statement to follow is a sad and desperate attempt to
+# set the macPackId so that file paths will turn out in processes
+# that rely on this module. This is really bad but right now I cannot
+# think of another way to make this happen. I appologize for the future
+# grief this is going to cause me or anyone else who tries to figure
+# this situation out.
+        if self.cType :
+            pcf = os.path.join(self.projHome, 'Config', 'project.conf')
+            pcfx = os.path.join(self.rapumaHome, 'config', mType + '.xml')
+            projectConfig = self.tools.loadConfig(pcf, pcfx)
+            # Having come this far, it is still possible that we cannot
+            # set the macPackId because the component type doesn't even
+            # need a macro package, PDF, for example. For that reason
+            # we will use "try" to check passively.
+            try :
+                self.macPackId = projectConfig['CompTypes'][self.cType.capitalize()]['macroPackage']
+            except :
+                pass
+
         debug                   = self.userConfig['System']['debugging']
         debugOutput             = os.path.join(self.userResource, 'debug', 'local_path.log')
         if debug and not os.path.exists(os.path.join(self.userResource, 'debug')) :
@@ -162,20 +184,22 @@ class ProjLocal (object) :
                     debugObj.write(cf + 'ConfXmlFileName' + ' = ' + getattr(self, cf + 'ConfXmlFile', os.path.join(self.rapumaConfigFolder, getattr(self, cf + 'ConfXmlFileName'))) + '\n')
 
         # Add macPack files via a specific macPack XML configuation file
+        if self.macPackId and os.path.exists(self.macPackConfXmlFile) :
+            macPackDict = self.tools.xmlFileToDict(self.macPackConfXmlFile)
         #if self.macPackId and os.path.exists(self.macroConfXmlFile) :
             #macPackDict = self.tools.xmlFileToDict(self.macroConfXmlFile)
-            #macPackFilesDict = {}
-            #for sections in macPackDict['root']['section'] :
-                #if sections['sectionID'] == 'Files' :
-                    #for section in sections :
-                        #secItem = sections[section]
-                        #if type(secItem) is list :
-                            #for f in secItem :
-                                #macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
-            #for f in macPackFilesDict.keys() :
-                #setattr(self, f, macPackFilesDict[f])
-                #if debug :
-                    #debugObj.write(f + ' = ' + getattr(self, f) + '\n')
+            macPackFilesDict = {}
+            for sections in macPackDict['root']['section'] :
+                if sections['sectionID'] == 'Files' :
+                    for section in sections :
+                        secItem = sections[section]
+                        if type(secItem) is list :
+                            for f in secItem :
+                                macPackFilesDict[f['moduleID']] = self.processNestedPlaceholders(f['fileName'])
+            for f in macPackFilesDict.keys() :
+                setattr(self, f, macPackFilesDict[f])
+                if debug :
+                    debugObj.write(f + ' = ' + getattr(self, f) + '\n')
 
         # Close the debug file if we need to
         if debug :

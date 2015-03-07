@@ -24,8 +24,7 @@ from rapuma.core.tools                  import Tools
 from rapuma.core.user_config            import UserConfig
 from rapuma.core.proj_local             import ProjLocal
 from rapuma.core.proj_log               import ProjLog
-
-#from rapuma.group.usfmTex               import UsfmTex
+from rapuma.group.usfmTex               import UsfmTex
 #from rapuma.project.proj_macro          import Macro
 
 ###############################################################################
@@ -34,7 +33,7 @@ from rapuma.core.proj_log               import ProjLog
 
 class Config (object) :
 
-    def __init__(self, pid, gid = None) :
+    def __init__(self, pid, gid=None) :
         '''Do the primary initialization for this class.'''
 
         self.pid                            = pid
@@ -42,7 +41,7 @@ class Config (object) :
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
         self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
-        self.local                          = ProjLocal(pid)
+        self.local                          = ProjLocal(pid, gid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)
         # Create config placeholders
@@ -72,10 +71,15 @@ class Config (object) :
         if gid :
             if not self.projectConfig :
                 self.getProjectConfig()
-            # Reinitialize local
-            self.local                      = ProjLocal(pid, gid, self.projectConfig)
-            self.cType                      = self.projectConfig['Groups'][gid]['cType']
-            self.Ctype                      = self.cType.capitalize()
+            # We need to skip over this if the group doesn't exist
+            try :
+                # Reinitialize local
+                self.cType                      = self.projectConfig['Groups'][gid]['cType']
+                self.Ctype                      = self.cType.capitalize()
+                self.local                      = ProjLocal(pid, gid, self.cType)
+            except :
+                self.cType                      = None
+                self.Ctype                      = None
         else :
             self.cType                      = None
             self.Ctype                      = None
@@ -145,6 +149,7 @@ class Config (object) :
         self.projectConfig['ProjectInfo']['projectCreateDate']         = self.tools.tStamp()
         self.projectConfig['ProjectInfo']['projectIDCode']             = pid
         self.projectConfig['Backup']['ownerID']                        = self.userConfig['System']['userID']
+        self.projectConfig['Groups']                                   = {}
         # Even though there was no push, we need a time stamp to avoid confusion
         self.projectConfig['Backup']['lastCloudPush']                  = self.tools.fullFileTimeStamp()
         self.projectConfig.filename                                    = local.projectConfFile
@@ -187,9 +192,10 @@ class Config (object) :
 # FIXME: To work around a circular init problem between Config() and Macro()
 # the macro package name (UsfmTex) has been hard coded. Not sure how to call
 # another function in another class that relies on this class to work.
+# This will break when the time comes that another macro family than UsfmTex
+# is used to hold the functions needed to process values to be used
         elif holderKey and holderType == 'function' :
 #            import pdb; pdb.set_trace()
-#            fnc = getattr(self.macPackFunctions, holderKey)
             fnc = getattr(UsfmTex(self.layoutConfig), holderKey)
             result = fnc()
         # A value that is a special character (escaped character)
