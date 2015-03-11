@@ -99,6 +99,7 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key startPageNumber --value 274
 # Footnotes
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key footnoteRuleOn --value "[config:macroConfig|Macros|[self:macPackId]|Footnotes|defineFootnoteRule]"
 
 ## RENDERING
 # Turn off PDF viewing to avoid screen clutter
