@@ -306,6 +306,8 @@ class Xetex (Manager) :
     def makeSettingsTexFile (self) :
         '''Create the primary TeX settings file.'''
 
+#        import pdb; pdb.set_trace()
+
         description = 'This is the primary TeX settings file for the ' + self.gid + ' group. \
         It is auto-generated so editing can be a rather futile exercise. This is unless you \
         set freezeTexSettings to True in the XeTeX manager configuration of the project.conf \
@@ -335,9 +337,6 @@ class Xetex (Manager) :
             # Build a dictionary from the default XML settings file
             # Create a dict that contains only the data we need here
             macPackDict = self.tools.xmlFileToDict(self.local.macPackConfXmlFile)
-
-#            import pdb; pdb.set_trace()
-
 
             for sections in macPackDict['root']['section'] :
                 for section in sections :
@@ -532,11 +531,93 @@ class Xetex (Manager) :
                         gidTexObject.write('\\input \"' + cidTexFileOff + '\"\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
+            
+
+
+#            import pdb; pdb.set_trace()
+
+
+
+            # Add PDF header declairations for PDF X1-A:2003 compliance
+            gidTexObject.write(self.makeXoneACompliant())
+            
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
 
         return True
 
+
+
+
+
+
+    def makeXoneACompliant (self) :
+        '''Insert the necessary TeX code into the header to give the
+        appearance of being PDF x1-a compliant. XeTeX output is x1-a
+        for the most part, it just doesn't brag about it.'''
+        
+        # Set some of the vars for the output
+        # project name
+        
+        title = self.projectConfig['ProjectInfo']['projectName']
+        subject = 'Scripture Publication'
+        author = self.projectConfig['ProjectInfo']['translators']
+        creator = self.projectConfig['ProjectInfo']['typesetters']
+#       '/CreationDate(D:20150320121400+07\'00\')%',
+#       '/ModDate(D:20150320121400+07\'00\')%',
+# This next bit is not right
+        offSet = "+07\'00\'"
+        comp = 'D:' + self.projectConfig['ProjectInfo']['projectCreateDate'].replace('-' or ':' or ' ', '') + offSet
+        cDate = 'D:' + comp + offSet
+        mDate = 'D:' + str(self.tools.fullFileTimeStamp) + offSet
+        icc = os.path.join(self.local.rapumaConfigFolder, 'ps_cmyk.icc')
+
+        lines = [   '\special{pdf:fstream @OBJCVR (' + icc + ')}',
+                    '\special{pdf:put @OBJCVR <</N 4>>}',
+                    '%\special{pdf:close @OBJCVR}',
+                    '\special{pdf:docinfo<<',
+                    '/Title(' + title + ')%',
+                    '/Subject(' + subject + ')%',
+                    '/Author(' + str(author) + ')%',
+                    '/Creator(' + str(creator) + ')%',
+                    '/CreationDate(' + cDate + ')%',
+                    '/ModDate(' + mDate + ')%',
+                    '/Producer(XeTeX with Rapuma)%',
+                    '/Trapped /False',
+                    '/GTS_PDFXVersion (PDF/X-1:2003)%',
+                    '/GTS_PDFXConformance (PDF/X-1a:2003)%',
+                    '>> }',
+                    '\special{pdf:docview <<',
+                    '/OutputIntents [ <<',
+                    '/Type/OutputIndent',
+                    '/S/GTS_PDFX',
+                    '/OutputCondition (An Unknown print device)',
+                    '/OutputConditionIdentifier (Custom)',
+                    '/DestOutputProfile @OBJCVR',
+                    '/RegistryName (http://www.color.og)',
+                    '>> ] >>}'
+                ]
+
+        allLines = ''
+        for l in lines : 
+            allLines = allLines + l + ' \n'
+        
+        
+        return allLines
+        
+        # 
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
 ###############################################################################
 ################################# Main Function ###############################
