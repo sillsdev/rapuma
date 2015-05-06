@@ -547,39 +547,36 @@ class Xetex (Manager) :
         return True
 
 
-
-
-
-
     def makeXoneACompliant (self) :
         '''Insert the necessary TeX code into the header to give the
         appearance of being PDF x1-a compliant. XeTeX output is x1-a
-        for the most part, it just doesn't brag about it.'''
+        for the most part, it just doesn't brag about it. The output
+        here mostly works. :-) '''
         
         # Set some of the vars for the output
         # project name
-        
-        title = self.projectConfig['ProjectInfo']['projectName']
-        subject = 'Scripture Publication'
+        title = self.projectConfig['ProjectInfo']['projectTitle']
+        subject = self.projectConfig['ProjectInfo']['projectDescription']
         author = self.projectConfig['ProjectInfo']['translators']
         creator = self.projectConfig['ProjectInfo']['typesetters']
-#       '/CreationDate(D:20150320121400+07\'00\')%',
-#       '/ModDate(D:20150320121400+07\'00\')%',
-# This next bit is not right
+        # I don't think this next bit is not right, what does +7 mean anyway?
+        # It works for CDT time anyway, which I thought was -6
         offSet = "+07\'00\'"
-        comp = 'D:' + self.projectConfig['ProjectInfo']['projectCreateDate'].replace('-' or ':' or ' ', '') + offSet
+        # To get the date stamp right, we strip out all the non-number
+        # characters so we are left with: yyyymmddhhmmss
+        comp = self.projectConfig['ProjectInfo']['projectCreateDate'].replace('-', '').replace(':', '').replace(' ', '')
         cDate = 'D:' + comp + offSet
-        mDate = 'D:' + str(self.tools.fullFileTimeStamp) + offSet
+        mDate = 'D:' + self.tools.fullFileTimeStamp() + offSet
         icc = os.path.join(self.local.rapumaConfigFolder, 'ps_cmyk.icc')
-
+        # Now create the insert line list
         lines = [   '\special{pdf:fstream @OBJCVR (' + icc + ')}',
                     '\special{pdf:put @OBJCVR <</N 4>>}',
                     '%\special{pdf:close @OBJCVR}',
                     '\special{pdf:docinfo<<',
                     '/Title(' + title + ')%',
                     '/Subject(' + subject + ')%',
-                    '/Author(' + str(author) + ')%',
-                    '/Creator(' + str(creator) + ')%',
+                    '/Author(' + author[0] + ')%',
+                    '/Creator(' + creator[0] + ')%',
                     '/CreationDate(' + cDate + ')%',
                     '/ModDate(' + mDate + ')%',
                     '/Producer(XeTeX with Rapuma)%',
@@ -601,23 +598,9 @@ class Xetex (Manager) :
         allLines = ''
         for l in lines : 
             allLines = allLines + l + ' \n'
-        
-        
+
         return allLines
-        
-        # 
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
 
 ###############################################################################
 ################################# Main Function ###############################
