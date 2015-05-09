@@ -32,10 +32,10 @@ set -v
 
 ## ASSET MANAGEMENT: Macros, Fonts, and Preprocess scripts
 # Macros
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150228.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150504.zip --component_type usfm
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro remove --component_type usfm
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro add --path ~/Publishing/my_source/assets/macros/usfmTex_20150225.zip --component_type usfm
-~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro update --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150228.zip --component_type usfm
+~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST macro update --path ~/Publishing/my_source/KYUM/updates/usfmTex_20150504.zip --component_type usfm
 # Fonts
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Charis\ SIL_4.106.zip --component_type usfm
 ~/Projects/rapuma/scripts/rapuma asset KYU-MYMR-KYUMTEST font add --path ~/Publishing/my_source/assets/fonts/Padauk_2.701.zip --component_type usfm
@@ -100,6 +100,11 @@ set -v
 # Footnotes
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key footnoteRuleOn --value "[config:macroConfig|Macros|[self:macPackId]|Footnotes|defineFootnoteRule]"
+# Project meta-data
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key projectDescription --value "Some New Testament Scripture in an Asian language"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key typesetters --value "Johannes Gutenberg"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key translators --value "John Wycliffe"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key projectTitle --value "Some Asian New Testament Scripture"
 
 ## RENDERING
 # Turn off PDF viewing to avoid screen clutter
