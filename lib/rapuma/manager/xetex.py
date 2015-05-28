@@ -496,6 +496,8 @@ class Xetex (Manager) :
                 startPageNumber = self.checkStartPageNumber()
                 if startPageNumber > 1 :
                     gidTexObject.write('\\pageno = ' + str(startPageNumber) + '\n')
+            # Insert Document properties and x1a compliant info if needed
+            gidTexObject.write(self.makeXoneACompliant())
             # Now add in each of the components
             for cid in cidList :
                 # Output files and commands for usfm cType
@@ -531,16 +533,7 @@ class Xetex (Manager) :
                         gidTexObject.write('\\input \"' + cidTexFileOff + '\"\n')
                 else :
                     self.log.writeToLog(self.errorCodes['0650'], [self.cType])
-            
 
-
-#            import pdb; pdb.set_trace()
-
-
-
-            # Add PDF header declairations for PDF X1-A:2003 compliance
-            gidTexObject.write(self.makeXoneACompliant())
-            
             # This can only hapen once in the whole process, this marks the end
             gidTexObject.write('\\bye\n')
 
@@ -549,16 +542,20 @@ class Xetex (Manager) :
 
     def makeXoneACompliant (self) :
         '''Insert the necessary TeX code into the header to give the
-        appearance of being PDF x1-a compliant. XeTeX output is x1-a
+        appearance of being PDF x1-a compliant. If the feature is turned
+        off then it will only inject relevant document properties that
+        are good to have included no mater what. XeTeX output is x1-a
         for the most part, it just doesn't brag about it. The output
         here mostly works. :-) '''
+
+#        import pdb; pdb.set_trace()
         
+        allLines = ''
         # Set some of the vars for the output
-        # project name
         title = self.projectConfig['ProjectInfo']['projectTitle']
         subject = self.projectConfig['ProjectInfo']['projectDescription']
-        author = self.projectConfig['ProjectInfo']['translators']
-        creator = self.projectConfig['ProjectInfo']['typesetters']
+        author = ''.join(self.projectConfig['ProjectInfo']['translators'])
+        creator = ''.join(self.projectConfig['ProjectInfo']['typesetters'])
         # I don't think this next bit is not right, what does +7 mean anyway?
         # It works for CDT time anyway, which I thought was -6
         offSet = "+07\'00\'"
@@ -567,35 +564,40 @@ class Xetex (Manager) :
         comp = self.projectConfig['ProjectInfo']['projectCreateDate'].replace('-', '').replace(':', '').replace(' ', '')
         cDate = 'D:' + comp + offSet
         mDate = 'D:' + self.tools.fullFileTimeStamp() + offSet
-        icc = os.path.join(self.local.rapumaConfigFolder, 'ps_cmyk.icc')
-        # Now create the insert line list
-        lines = [   '\special{pdf:fstream @OBJCVR (' + icc + ')}',
-                    '\special{pdf:put @OBJCVR <</N 4>>}',
-                    '%\special{pdf:close @OBJCVR}',
+        lines = [   
                     '\special{pdf:docinfo<<',
                     '/Title(' + title + ')%',
                     '/Subject(' + subject + ')%',
-                    '/Author(' + author[0] + ')%',
-                    '/Creator(' + creator[0] + ')%',
+                    '/Author(' + author + ')%',
+                    '/Creator(' + creator + ')%',
                     '/CreationDate(' + cDate + ')%',
                     '/ModDate(' + mDate + ')%',
                     '/Producer(XeTeX with Rapuma)%',
                     '/Trapped /False',
-                    '/GTS_PDFXVersion (PDF/X-1:2003)%',
-                    '/GTS_PDFXConformance (PDF/X-1a:2003)%',
-                    '>> }',
-                    '\special{pdf:docview <<',
-                    '/OutputIntents [ <<',
-                    '/Type/OutputIndent',
-                    '/S/GTS_PDFX',
-                    '/OutputCondition (An Unknown print device)',
-                    '/OutputConditionIdentifier (Custom)',
-                    '/DestOutputProfile @OBJCVR',
-                    '/RegistryName (http://www.color.og)',
-                    '>> ] >>}'
+                    '/GTS_PDFXVersion(PDF/X-1:2003)%',
+                    '/GTS_PDFXConformance(PDF/X-1a:2003)%',
+                    '>> }'
                 ]
+        # Add PDF header declairations for PDF X1-A:2003 compliance (default is True)
+        if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['pdfX1a']) :
+            icc = os.path.join(self.local.rapumaConfigFolder, 'ps_cmyk.icc')
+            # Now create the insert line list
+            xtralines =  [   '\special{pdf:fstream @OBJCVR (' + icc + ')}',
+                                '\special{pdf:put @OBJCVR <</N 4>>}',
+                                '%\special{pdf:close @OBJCVR}',
+                                '\special{pdf:docview <<',
+                                '/OutputIntents [ <<',
+                                '/Type/OutputIndent',
+                                '/S/GTS_PDFX',
+                                '/OutputCondition (An Unknown print device)',
+                                '/OutputConditionIdentifier (Custom)',
+                                '/DestOutputProfile @OBJCVR',
+                                '/RegistryName (http://www.color.og)',
+                                '>> ] >>}'
+                        ]
+            lines = lines + xtralines
 
-        allLines = ''
+        # Whatever our output, process the lines
         for l in lines : 
             allLines = allLines + l + ' \n'
 

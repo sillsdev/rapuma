@@ -136,6 +136,13 @@ Todo:
         <description>Various features used in this document/publication.</description>
 
         <setting>
+            <name>Use PDF-X1a Output</name>
+            <description>If this is set to true, XeTeX should output all the necessary header information to make the document comply to the PDF X1a standard for printing. Default = True</description>
+            <key>pdfX1a</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
             <name>Use Document Information</name>
             <description>If this is set to true, document information will be added in header and footer lines. This information will be merged with the typeset page. This is independent to the background merge operation. Default = False</description>
             <key>useDocInfo</key>
