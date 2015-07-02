@@ -83,6 +83,7 @@ class ProjIllustration (object) :
             '0240' : ['MSG', 'Illustration add operation complete!'],
             '0265' : ['LOG', 'Piclist file for [<<1>>] has been created.'],
             '0270' : ['WRN', 'Illustration file [<<1>>] not found in Illustration folder.'],
+            '0280' : ['ERR', 'There was a problem trying to import the illustration file(s). A possible cause could be that there was no \\fig markers in the source imported into the project. I\'m just say\'n.'],
 
             '1010' : ['MSG', 'Removed illustration file [<<1>>] from project Illustration folder.'],
             '1020' : ['LOG', 'Request to removed illustration file [<<1>>] from project Illustration folder. File not found. Operation not complete'],
@@ -109,29 +110,35 @@ class ProjIllustration (object) :
         fail if a copy doesn't succeed. If the file is already there,
         give a warning and do not copy.'''
 
-        for i in self.illustrationConfig[self.gid].keys() :
-            cid = self.illustrationConfig[self.gid][i]['bid']
-            fileName = self.illustrationConfig[self.gid][i]['fileName']
-            target = os.path.join(self.projIllustrationFolder, fileName)
-            # Check to see if the target exists
-            if not os.path.isfile(target) :
-                source = os.path.join(path, fileName)
-                if os.path.isfile(source) :
-                    # Make sure we have a target dir
-                    if not os.path.isdir(self.projIllustrationFolder) :
-                        os.makedirs(self.projIllustrationFolder)
-                    # Copy in the source to the project
-                    if not shutil.copy(source, target) :
-                        self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(source)])
-                    # Double check that it happened
-                    if not os.path.isfile(target) :
-                        self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(source)])
-            else :
-                self.log.writeToLog(self.errorCodes['0210'], [self.tools.fName(target)])
+#        import pdb; pdb.set_trace()
 
-        # If nothing above failed, we can return True now
-        self.log.writeToLog(self.errorCodes['0240'])
-        return True
+        try :
+            for i in self.illustrationConfig[self.gid].keys() :
+                cid = self.illustrationConfig[self.gid][i]['bid']
+                fileName = self.illustrationConfig[self.gid][i]['fileName']
+                target = os.path.join(self.projIllustrationFolder, fileName)
+                # Check to see if the target exists
+                if not os.path.isfile(target) :
+                    source = os.path.join(path, fileName)
+                    if os.path.isfile(source) :
+                        # Make sure we have a target dir
+                        if not os.path.isdir(self.projIllustrationFolder) :
+                            os.makedirs(self.projIllustrationFolder)
+                        # Copy in the source to the project
+                        if not shutil.copy(source, target) :
+                            self.log.writeToLog(self.errorCodes['0220'], [self.tools.fName(source)])
+                        # Double check that it happened
+                        if not os.path.isfile(target) :
+                            self.log.writeToLog(self.errorCodes['0230'], [self.tools.fName(source)])
+                else :
+                    self.log.writeToLog(self.errorCodes['0210'], [self.tools.fName(target)])
+
+            # If nothing above failed, we can return True now
+            self.log.writeToLog(self.errorCodes['0240'])
+            return True
+        except :
+            self.log.writeToLog(self.errorCodes['0280'])
+            return False
 
 
     def missingIllustrations (self, bid) :
