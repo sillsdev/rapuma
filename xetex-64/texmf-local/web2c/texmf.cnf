@@ -679,7 +679,7 @@ buf_size = 200000
 % 
 trie_size = 700000
 
-hyph_size = 14009        % prime number of hyphenation exceptions, >610, <32767.
+hyph_size = 14621        % prime number of hyphenation exceptions, >610, <32767.
                          % http://primes.utm.edu/curios/page.php/8191.html
 nest_size = 500		 % simultaneous semantic levels (e.g., groups)
 max_in_open = 15	 % simultaneous input files and error insertions
