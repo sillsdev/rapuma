@@ -850,7 +850,7 @@ if __name__ == '__main__' :
     contentCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
     contentCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     contentCommand.add_argument('-c', '--comp_type', choices=ctCompType, help='The group component type is needed for creating a new group.')
-    contentCommand.add_argument('-f', '--file_type', choices=flType, help='The file type is needed for comparing the current working component file with its parent. You can compare the current file with the last backup (default) or its source.')
+    contentCommand.add_argument('-f', '--file_type', choices=flType, help='The file (parent) type is needed for comparing the current working component file with its parent. You can compare the current file with the last backup (default) or its source.')
     contentCommand.add_argument('-p', '--path', help='A path to were component files may be found.')
 
     # Add project Asset management subprocess arguments
