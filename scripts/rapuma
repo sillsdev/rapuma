@@ -388,6 +388,7 @@ def userArguments (args) :
         cmd         = args.command
         sub         = args.sub_command
         cType       = args.comp_type
+        fType       = args.file_type
         cid_list    = []            # A list of one or more cids
         source_list = []            # Gen: A list of files w/paths
         path        = ''
@@ -465,8 +466,17 @@ def userArguments (args) :
                 # Add one or more components in a group (will not overwrite)
                 ProjSetup(sysConfig, pid, gid).addComponent(gid, source_list)
             elif sub == 'compare' :
-                tools.terminal('\nCompare the current component working text with the previous version. \n')
-                sys.exit('\n Unfortunately, the ' + sub + ' command for ' + cmd + ' has not been implemented yet. Process halting.\n')
+                # Compare a single component, its current version with a previous one.
+                if not cid_list :
+                    sys.exit('\nERROR: Must provide a Component ID for this process. Process halting.\n')
+                # In case there are multiple components to be compared
+                for cid in cid_list :
+                    if fType :
+                        # The default is to compare current with backup, this can override and
+                        # compare it with the source.
+                        ProjCompare(pid).compareComponent(gid, cid, fType)
+                    else :
+                        ProjCompare(pid).compareComponent(gid, cid)
             elif sub == 'remove' :
                 # Remove one or more components from a group
                 ProjSetup(sysConfig, pid, gid).removeComponents(gid, source_list)
@@ -808,6 +818,7 @@ if __name__ == '__main__' :
     ctCmd              = ['component', 'group']
     ctSubCmd           = ['add', 'compare', 'remove', 'update']
     ctCompType         = ['usfm', 'pdf']
+    flType             = ['backup', 'source']
     # Asset
     asCmd              = ['background', 'font', 'illustration', 'macro', 'script']
     asSubCmd           = ['add', 'remove', 'update']
@@ -839,6 +850,7 @@ if __name__ == '__main__' :
     contentCommand.add_argument('-g', '--group_id', help='A unique group ID for this command.')
     contentCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     contentCommand.add_argument('-c', '--comp_type', choices=ctCompType, help='The group component type is needed for creating a new group.')
+    contentCommand.add_argument('-f', '--file_type', choices=flType, help='The file type is needed for comparing the current working component file with its parent. You can compare the current file with the last backup (default) or its source.')
     contentCommand.add_argument('-p', '--path', help='A path to were component files may be found.')
 
     # Add project Asset management subprocess arguments

@@ -22,6 +22,8 @@ from configobj import ConfigObj
 from rapuma.core.tools              import Tools
 from rapuma.core.user_config        import UserConfig
 from rapuma.core.proj_log           import ProjLog
+from rapuma.project.proj_config     import Config
+from rapuma.core.proj_local         import ProjLocal
 
 
 class ProjCompare (object) :
@@ -33,7 +35,11 @@ class ProjCompare (object) :
         self.log                            = ProjLog(self.pid)
         self.tools                          = Tools()
         self.user                           = UserConfig()
+        self.config                         = Config(pid)
+        self.local                          = ProjLocal(self.pid)
         self.userConfig                     = self.user.userConfig
+        self.config.getProjectConfig()
+        self.projectConfig                  = self.config.projectConfig
         if self.userConfig['System']['textDifferentialViewerCommand'] == '' :
             self.diffViewCmd                = None
         else :
@@ -48,7 +54,7 @@ class ProjCompare (object) :
             '0280' : ['ERR', 'Failed to compare files with error: [<<1>>]'],
             '0285' : ['ERR', 'Cannot compare component [<<1>>] because a coresponding subcomponent could not be found.'],
             '0290' : ['ERR', 'Compare test type: [<<1>>] is not valid.'],
-            '0295' : ['MSG', 'Comparing: [<<1>>] with [<<2>>] Close the viewer to return to the terminal prompt.'],
+            '0295' : ['MSG', 'Comparing: [<<1>>] with parent: [<<2>>] Close the viewer to return to the terminal prompt.'],
             '0220' : ['MSG', 'Comparison not needed, files seem to be the same.'],
             '0300' : ['WRN', 'Files are different but visual compare is not enabled.']
         }
@@ -60,12 +66,20 @@ class ProjCompare (object) :
 ######################## Error Code Block Series = 0200 ########################
 ###############################################################################
 
-    def compareComponent (self, gid, cid, test) :
+    def compareComponent (self, gid, cid, parent='backup') :
         '''Compare a component with its source which was copied into the project
         when the component was created. This will pull up the user's differential
         viewer and compare the two files.'''
 
-        print 'ERROR: proj_compare.compareComponent() needs to be rewritten!'
+        cType       = self.projectConfig['Groups'][gid]['cType']
+        pFile       = self.local.getComponentFiles(gid, cid, cType)[parent.lower()]
+        wFile       = self.local.getComponentFiles(gid, cid, cType)['working']
+        # Do a quick check between the current and the source
+        # Run the compare app if a difference is found
+        if self.isDifferent(wFile, pFile) :
+            self.compare(wFile, pFile)
+        else :
+            self.log.writeToLog(self.errorCodes['0220'])
 
 
     def isDifferent (self, new, old) :
@@ -86,7 +100,7 @@ class ProjCompare (object) :
 
 
     def compare (self, old, new) :
-        '''Run a compare on two files. Do not open in viewer unless it is different.'''
+        '''Run a compare on two files.'''
 
 #        import pdb; pdb.set_trace()
 
@@ -104,7 +118,7 @@ class ProjCompare (object) :
                 cmd.extend(self.diffViewCmd)
                 cmd.extend([old, new])
                 try :
-                    self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(new),self.tools.fName(old)])
+                    self.log.writeToLog(self.errorCodes['0295'], [self.tools.fName(old),self.tools.fName(new)])
                     subprocess.call(cmd)
                 except Exception as e :
                     # If we don't succeed, we should probably quite here
