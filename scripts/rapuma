@@ -285,7 +285,9 @@ def validatePid (pid, path = None) :
     if results :
         return pid
     else :
-        sys.exit('\n Sorry, Project ID [' + pid + '] does not appear to be valid. Process halting.\n')
+        # Error message is a little long here but gives a clue as to
+        # where the system is looking for the project config file
+        sys.exit('\n Sorry, Project ID [' + pid + '] does not appear to be valid. Cannot find project configuration file at: ' + os.path.join(validatePath(path), pid, 'Config') + ' Process halting.\n')
 
 
 def validatePath (path) :

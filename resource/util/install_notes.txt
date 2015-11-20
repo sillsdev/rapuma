@@ -1,0 +1,44 @@
+Date: 5 Sep 2015
+By: Dennis Drescher <dennis.drescher.86@gmail.com>
+
+This is for installing a beta package of TECkit. TECkit can be used
+for some "special effects" like number mapping, and other on-the-fly
+encoding conversion actions while XeTeX is rendering. 
+
+If a publishing project does not come with a pre-compiled TECkit mapping,
+one will need to be mapped and compiled. For this, TECkit will need to
+be installed on your system. The instructions below are taken from an email
+from Neil Mayhew <neil_mayhew@sil.org> for a beta package he was working
+on at the time. (Sep. 2015)
+
+<quote>
+
+I had to do some more work on the packaging due to a change in the way
+perl installs its libraries in newer distros (utopic onwards). However,
+I've built 2.5.4~beta1 packages for precise, trusty, utopic and vivid,
+and uploaded them to the -experimental section of packages.sil.org. If
+you don't have this enabled, you need the following lines in
+/etc/apt/sources.list, or on their own in a file in /etc/apt/sources.list.d:
+
+deb http://packages.sil.org/ubuntu/ trusty main universe multiverse restricted #SIL
+deb http://packages.sil.org/ubuntu/ trusty-experimental main universe multiverse restricted #SIL experimental
+
+Replace "trusty" with "vivid" if you're using the latest Ubuntu. You'll
+also need to add the repo key if you haven't used packages.sil.org on
+this machine before. Instructions are at http://packages.sil.org/
+
+The teckit package still has the conflict with texlive-binaries, since I
+haven't had a chance to fix that yet, but for others who may need it,
+there's a manual workaround. Before installing teckit,
+
+sudo dpkg-divert --package teckit --rename --add /usr/bin/teckit_compile
+
+The libteckit-dev package is currently uninstallable due to a typo in
+the specification of dependencies, but I don't think you'll need it. The
+libteckit-perl package is OK, however.
+
+--Neil
+
+</quote>
+
+
