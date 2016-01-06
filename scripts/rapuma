@@ -237,7 +237,7 @@ def userArguments (args) :
             if not setting :
                 sys.exit('\nERROR: No setting was given. Process halting.\n')
             # Path checking
-            if cmd in ['cloud', 'project'] :
+            if cmd in ['cloud', 'projects'] :
                 if not os.path.exists(tools.resolvePath(setting)) :
                     sys.exit('\nERROR: Path given is not valid. Process halting.\n')
                 else :
@@ -246,7 +246,7 @@ def userArguments (args) :
                 uc.setSystemSettings('System', 'userName', setting)
             elif cmd == 'uid' :
                 uc.setSystemSettings('System', 'userID', setting)
-            elif cmd == 'project' :
+            elif cmd == 'projects' :
                 uc.setSystemSettings('Resources', 'projects', path)
             elif cmd == 'cloud' :
                 uc.setSystemSettings('Resources', 'cloud', path)
