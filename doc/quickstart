@@ -1,6 +1,9 @@
-
 RAPUMA QUICK START GUIDE
 -----------------------------------------
+	By Dennis Drescher (dennis.drescher.86@gmail.com)
+	Last edited: 29 January 2016
+-----------------------------------------
+
 This will help you setup a new Rapuma installation and show you a couple, hopefully useful, exercises.
 
 
@@ -8,39 +11,26 @@ RAPUMA SETUP
 -----------------------------------------
 Once Rapuma is installed, there really is not much setup to do. The first thing you will want to do is set the user name. To do that, use this command:
 
-    rapuma system setup name -s "<Your Name>"
+    rapuma setting system rapuma --section System --key userName --value "<Your Name>"
 
 Set your user ID (no spaces) with...
 
-    rapuma system setup uid -s <user_id>
+    rapuma setting system rapuma --section System --key userID --value "<Whatever your ID is>"
 
-Set the default path to your publishing projects folder:
+Set the default path to your publishing projects folder (change path as necessary):
 
-    rapuma system setup projects -s "~/Publishing"
+    rapuma setting system rapuma --section Resources --key projects --value "~/Publishing"
 
 Set the path to the "Cloud" (Internet storage like Dropbox):
 
-    rapuma system setup cloud -s "~/Dropbox/MSEAG_Publishing"
-
-Rapuma manages a number of resources. It is often nice to put those in the folder where your publishing projects are, that is the default but that is not strictly necessary and can be changed by editing the Rapuma system configuration file located in ~/.config/rapuma. To create the default group of folders where the Rapuma resources will be kept, use this command:
-
-    rapuma system setup folders -s default
-
-Rapuma will create a folder named "Rapuma" following the path you gave it. Inside that folder will be a number of other folders for things such as backups, archives, templates, etc.
+    rapuma setting system rapuma --section Resources --key cloud --value "~/Dropbox/MSEAG_Publishing"
 
 This completes the basic setup routine for Rapuma. Now you can try the examples.
 
 
 RAPUMA EXAMPLES
 -----------------------------------------
-Rapuma comes with a couple example projects. Use these commands to run them:
+Rapuma comes with an example project. The tutorial document for this project is found in the Rapuma folder under resource/example/KYUM_ExampleAndTotorial.odt. To learn how to setup and manage a project, consult this document.
 
-File: example-jas.sh (A paraphase of the book of James in English.)
-
-File: example-mrk.sh * (The Book of Mark in a language that uses Burmese script.)
-
-* Note this script is not fully working yet
-
-To get a better idea of what Rapuma does, read the comments that accompany each demo script. There is an explanation for each command. The examples will be refined further and more will be added as development continues. This concludes our Quick Start Guide. Hopefully, in the not so distant future there will be more tutorial material available.
 
 

@@ -274,6 +274,12 @@ def validatePid (pid, path = None) :
     a local installed project or found in the given path. Kill the process
     if it is not.'''
 
+    # When the user wants to update a system conf file a PID is not necessary.
+    # This will allow the process to bypass the need for a PID. Instead the user
+    # will need to use a key word, in this case, 'system'.
+    if pid.lower() == 'system' :
+        return pid.upper()
+
     results = ''
     # When a path is given we check that first
     if path :

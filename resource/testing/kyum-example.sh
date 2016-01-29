@@ -73,7 +73,7 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key bindingOrder --value 2
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key bindingOrder --value 3
 # General
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/TeXBehavior --key vFuzz --value 4.8pt
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/TeXBehavior --key vFuzz --value 4.8pt
 # Illustrations
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/GOSPEL --key useIllustrations --value True
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key useFigurePlaceHolders --value False

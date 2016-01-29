@@ -1,11 +1,11 @@
 INSTALLATION INSTRUCTIONS FOR RAPUMA
-	By Dennis Drescher (dennis_drescher@sil.org)
-	Last edited: 13 January 2015
+	By Dennis Drescher (dennis.drescher.86@gmail.com)
+	Last edited: 29 January 2016
 ------------------------------------------------------------------------
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
 
-STATUS: Currently Rapuma is under heavy development (by one, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
+STATUS: Currently Rapuma is under light development (by one, part-time, amateur Python programmer) and only has a command line API. There are hopes to develop a GUI once a useful number of features have been implemented. Deployment of Rapuma in a limited scope, primarily text processing, began in October 2012. It was "feature-adequate" by early 2013, in time to do a Bible publication.
 
 The instructions below are for manually installing the Rapuma publishing system package on a typical Ubuntu-ish operating system (currently Linux Mint 17 - based on Ubuntu 14.04/Trusty Tahr). Ultimately we want Rapuma to completely install from the package but at this point, given the state of flux it is in, it is best to get the latest code from the github repository and manually install it. The installation commands listed here will be done in the terminal. If you have not opened a terminal yet, do it now.
 
@@ -102,6 +102,6 @@ To test the instalation, type:
 
     rapuma -h
 
-What you should get is a Rapuma help screen. To get started using it, read the quickstart file that is in the rapuma repo directory.
+What you should get is a Rapuma help screen. To get started using it, read the quickstart file that is in the rapuma doc directory.
 
 
