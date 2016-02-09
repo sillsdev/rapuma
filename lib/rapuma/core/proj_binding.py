@@ -187,10 +187,20 @@ class ProjBinding (object) :
         # This is our working file for this operation
         tempFile = tempfile.NamedTemporaryFile().name + '.pdf'
 
-
+        # FIXME: Note/Warning, the use "-dPDFSETTINGS=/prepress" can cause an issue when
+        # rendering. A segmentation fault may occur. This will cause the bind feature
+        # to fail and gs will fail. There does not seem to be any way around this
+        # as getting feedback from gs while processing is not possible, or at least
+        # not very easy. It will have to stay this way for now.
         cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]
+
+        # If there issues with segmentation faults, the following should help with debugging
+        # cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-sOutputFile=' + tempFile]
+
+        # Now add the files we want to bind together
         cmd = cmd + sourceList
 
+        # Now bind the files
         try :
             self.log.writeToLog(self.errorCodes['0300'])
             subprocess.call(cmd)
