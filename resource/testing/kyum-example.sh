@@ -91,15 +91,15 @@ set -v
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key docInfoText --value "Rapuma Test Render"
 # Columns
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST layout --section DocumentFeatures --key columnGutterRule --value True
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Columns --key columnGutterFactor --value 20
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Columns --key columnGutterRuleSkip --value 4
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/Columns --key columnGutterFactor --value 20
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/Columns --key columnGutterRuleSkip --value 4
 # Verse number display
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/ChapterVerse --key useMarginalVerses --value True
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/ChapterVerse --key useMarginalVerses --value True
 # Binding
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section Groups/FOURTEES --key startPageNumber --value 274
 # Footnotes
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
-~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150228/Footnotes --key footnoteRuleOn --value "[config:macroConfig|Macros|[self:macPackId]|Footnotes|defineFootnoteRule]"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/Footnotes --key defineFootnoteRule --value "\hrule height 2pt\smallskip"
+~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST macro --section Macros/usfmTex_20150504/Footnotes --key footnoteRuleOn --value "[config:macroConfig|Macros|[self:macPackId]|Footnotes|defineFootnoteRule]"
 # Project meta-data
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key projectDescription --value "Some New Testament Scripture in an Asian language"
 ~/Projects/rapuma/scripts/rapuma setting KYU-MYMR-KYUMTEST project --section ProjectInfo --key typesetters --value "Johannes Gutenberg"
