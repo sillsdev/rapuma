@@ -1,6 +1,6 @@
 INSTALLATION INSTRUCTIONS FOR RAPUMA
-	By Dennis Drescher (sparkycbr@gmail.com)
-	Last edited: 29 January 2016
+    By Dennis Drescher (sparkycbr at gmail dot com)
+    Last edited: 29 January 2016
 ------------------------------------------------------------------------
 
 RAPUMA (RApid PUblication MAnager) is intended to be a system for managing publication data that could be used for output in a variety of media. Rapuma takes data from the editing environment and allows the user to create, manage and apply repeatable processes to the publication data for output. An example would be a USFM manuscript created and edited in ParaTExt being output to a print-ready PDF document. This would be for printing a book which contains all its components such as front and back matter, contents, maps and cover. Rapuma should be able to manage all the various processes that go into a publication such as this and when it is complete, all the data components ready for archiving.
