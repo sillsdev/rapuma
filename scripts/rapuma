@@ -46,11 +46,13 @@ startTime = timeit.default_timer()
 
 # Set the Rapuma base program paths. It looks in /usr/share first for an
 # installed copy. If you give it a actual path to the development version
-# it will run from there. (~/Projects/rapuma/scripts/rapuma)
+# it will run from there. (E.g. ~/Projects/rapuma/scripts/rapuma)
+
 # FIXME: Environment variables are set that may not be needed if this block
 # of code was turned into a module and called from the dependent modules.
 # E.g., if rapuma is called from /usr/bin/rapuma then rapumaBase = /usr
 # If from ~/Projects/rapuma/scripts/rapuma then rapumaBase = ~/Projects/rapuma
+
 rapumaBase = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 rapumaHome = [d for d in [os.path.join(rapumaBase, 'share', 'rapuma'), 
                         os.path.join(rapumaBase)] if os.path.exists(d)]
