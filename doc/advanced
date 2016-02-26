@@ -1,0 +1,24 @@
+ADVANCED USER TIPS, TRICKS AND ADVICE
+	By Dennis Drescher (sparkycbr@gmail.com)
+	Last edited: 24 February 2016
+------------------------------------------------------------------------
+
+Description:
+
+This document contains tips, tricks and advice for more advanced publication issues. 
+
+
+------------------------------------------------------------------------
+WORKING WITH ILLUSTRATIONS
+------------------------------------------------------------------------
+
+RGB TO CMYK GRAPHIC CONVERSION
+Found by Flip Wester (24 Feb 2016)
+
+Computer graphics/illustrations are inherently RGB. This is because for on-screen viewing, that is the format they must be in. However, when a document needs to be printed (on a printing press), to facilitate that process, the images must be in the CMYK format. Converting between RGB and CMYK is not easy but a free service has been found that will take a PDF document produced by Rapuma and convert all the RGB images in it to CMYK. This is the URL:
+
+http://www.pdf2cmyk.com/
+
+So far, this service has been found to be accurate and reliable. Remember, it more than likely is necessary to convert images even if they are black and white or gray scale. Doing this conversion before sending the document on for processing could save time and unnecessary problems when it goes to print.
+
+

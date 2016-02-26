@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf_8 -*-
-# version: 20110823
-# By Dennis Drescher (dennis_drescher at sil.org)
+# version: 201160223
+# By Dennis Drescher (sparkycbr at gmail dot com)
 
 ###############################################################################
 ######################### Description/Documentation ###########################
@@ -124,34 +124,39 @@ class UserConfig (object) :
         else :
             projects = self.tools.resolvePath(self.userConfig['Resources']['projects'])
 
-        # Get the user config Rapuma resource folder location
-        if not self.userConfig['Resources'].has_key('rapumaResource') :
-            # Check for pre-typo-fix value ('rapumaResouce') before creating new section
-            if self.userConfig['Resources'].has_key('rapumaResouce') :
-                self.userConfig['Resources'].rename('rapumaResouce', 'rapumaResource')
-                confWriteFlag = True
-            else:
-                self.tools.buildConfSection(self.userConfig['Resources'], 'rapumaResource')
-                confWriteFlag = True
-        if len(self.userConfig['Resources']['rapumaResource']) > 0 :
-            rapumaResource = self.userConfig['Resources']['rapumaResource']
-        else :
-            # This is the default location
-            rapumaResource = os.path.join(site.USER_BASE, 'share', 'rapuma')
-            self.userConfig['Resources']['rapumaResource'] = rapumaResource
-            confWriteFlag = True
+# Note: The following was commented because it no longer is necessary to load in locations
+# for various resouces. That will be dynamically. If the program ever reaches the point
+# where this would be good to have, it can be handled by a GUI. (djd - 20160223)
 
-        # Make a list of sub-folders to make in the Rapuma resourcs folder
-        resourceFolders = ['archive', 'backup', 'font', 'illustration', \
-                            'macro','script', 'template']
 
-        for r in resourceFolders :
-            # Build the path and check if it can be made
-            thisPath = os.path.join(rapumaResource, r)
-            if not os.path.isdir(thisPath) :
-                os.makedirs(thisPath)
-            self.userConfig['Resources'][r] = thisPath
-            confWriteFlag = True
+#        # Get the user config Rapuma resource folder location
+#        if not self.userConfig['Resources'].has_key('rapumaResource') :
+#            # Check for pre-typo-fix value ('rapumaResouce') before creating new section
+#            if self.userConfig['Resources'].has_key('rapumaResouce') :
+#                self.userConfig['Resources'].rename('rapumaResouce', 'rapumaResource')
+#                confWriteFlag = True
+#            else:
+#                self.tools.buildConfSection(self.userConfig['Resources'], 'rapumaResource')
+#                confWriteFlag = True
+#        if len(self.userConfig['Resources']['rapumaResource']) > 0 :
+#            rapumaResource = self.userConfig['Resources']['rapumaResource']
+#        else :
+#            # This is the default location
+#            rapumaResource = os.path.join(site.USER_BASE, 'share', 'rapuma')
+#            self.userConfig['Resources']['rapumaResource'] = rapumaResource
+#            confWriteFlag = True
+
+#        # Make a list of sub-folders to make in the Rapuma resourcs folder
+#        resourceFolders = ['archive', 'backup', 'font', 'illustration', \
+#                            'macro','script', 'template']
+
+#        for r in resourceFolders :
+#            # Build the path and check if it can be made
+#            thisPath = os.path.join(rapumaResource, r)
+#            if not os.path.isdir(thisPath) :
+#                os.makedirs(thisPath)
+#            self.userConfig['Resources'][r] = thisPath
+#            confWriteFlag = True
 
         # Write out if needed
         if confWriteFlag :
