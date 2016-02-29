@@ -35,7 +35,7 @@ setup(name = 'rapuma',
         package_dir = {'':'lib'},
         packages = ["rapuma", 'rapuma.core', 'rapuma.group', 'rapuma.manager', 'rapuma.project'],
         scripts = glob("scripts/rapuma*"),
-        license = 'LGPL',
+        license = 'GPL',
         data_files = datafiles
      )
 

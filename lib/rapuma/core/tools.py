@@ -858,6 +858,22 @@ class Tools (object) :
     Section.override = override_section
 
 
+    def getPdfViewerCommand (self, userConfig, projectConfig) :
+        '''The viewer command can come from 2 sources, figure out which one to use.
+        The setting in the project.conf will override the default in system.ini.
+        By setting the value to 'none' in the project.conf, it allows you to turn
+        off viewing which, in some automated situations is necessary. Otherwise
+        it expects to find the value to be "default".'''
+        
+        # The use of 'none' here is a hard-coded magic value
+        if projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand'][0] == 'none' :
+            return
+        elif projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand'][0] == 'default' :
+            return userConfig['System']['pdfViewerCommand']
+        else :
+            return projectConfig['Managers']['usfm_Xetex']['pdfViewerCommand']
+
+
 ###############################################################################
 ################################# Terminal Output #############################
 ###############################################################################

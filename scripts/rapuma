@@ -124,10 +124,12 @@ tools                                   = Tools()
 
 # Get a list of projects
 projDir = os.path.expanduser(uc.userConfig['Resources']['projects'])
-if os.path.exists(projDir) :
+if projDir and os.path.exists(projDir) :
     projList = tools.getProjIdList(projDir)
 else :
-    sys.exit('\nERROR: The projects folder path is not valid: ' + projDir + '. Process halting.\n')
+    if not projDir :
+        projDir = '<null>'
+    sys.exit('\nERROR: The projects folder path is missing or not valid: ' + projDir + '\nIt maybe necessary to change the configuration and reinstall Rapuma. \nProcess halting.\n')
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']

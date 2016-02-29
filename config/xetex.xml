@@ -24,14 +24,7 @@ Todo:
         <key>pdfViewerCommand</key>
         <description>The command needed to view the PDF output created by this module. The default is taken from the rapuma system configuration file.</description>
         <type>list</type>
-        <value></value>
-    </setting>
-    <setting>
-        <name>PDF Utility Command</name>
-        <key>pdfUtilityCommand</key>
-        <description>The primary command needed to do PDF file manipulations. Subsequent commands need to be added at the function level.</description>
-        <type>list</type>
-        <value></value>
+        <value>default</value>
     </setting>
     <setting>
         <name>Freeze TeX Settings</name>

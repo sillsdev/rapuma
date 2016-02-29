@@ -53,8 +53,7 @@ class ProjBinding (object) :
         self.projHome           = os.path.join(self.userConfig['Resources']['projects'], self.pid)
         self.local              = ProjLocal(self.pid)
         self.log                = ProjLog(self.pid)
-        self.pdfViewerCmd       = self.userConfig['System']['pdfViewerCommand']
-
+        self.pdfViewerCmd       = self.tools.getPdfViewerCommand(self.userConfig, self.projectConfig)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -163,7 +162,7 @@ class ProjBinding (object) :
 
         # View the file
         if os.path.isfile(viewFile) :
-            if not len(self.pdfViewerCmd[0]) == 0 :
+            if self.pdfViewerCmd :
                 # Add the file to the viewer command
                 self.pdfViewerCmd.append(viewFile)
                 # Run the viewer

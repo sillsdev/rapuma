@@ -85,8 +85,8 @@ class Xetex (Manager) :
         self.userConfig             = self.project.userConfig
         self.macPackId              = self.projectConfig['CompTypes'][self.Ctype]['macroPackage']
         # Some config settings
-        self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
-        self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
+
+        self.pdfViewerCmd           = self.tools.getPdfViewerCommand(self.userConfig, self.projectConfig)
         self.sourceEditor           = self.projectConfig['CompTypes'][self.Ctype]['sourceEditor']
         self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
         self.useDiagnostic          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDiagnostic'])
@@ -821,7 +821,7 @@ class Xetex (Manager) :
 
         # Now view it
         if os.path.isfile(viewFile) :
-            if not len(self.pdfViewerCmd[0]) == 0 :
+            if self.pdfViewerCmd :
                 # Add the file to the viewer command
                 self.pdfViewerCmd.append(viewFile)
                 # Run the XeTeX and collect the return code for analysis

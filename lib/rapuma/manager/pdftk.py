@@ -69,8 +69,7 @@ class Pdftk (Manager) :
         self.layoutConfig           = self.proj_config.layoutConfig
         self.userConfig             = self.project.userConfig
         # Some config settings
-        self.pdfViewerCmd           = self.project.userConfig['System']['pdfViewerCommand']
-        self.pdfUtilityCmd          = self.project.userConfig['System']['pdfUtilityCommand']
+        self.pdfViewerCmd           = self.tools.getPdfViewerCommand(self.userConfig, self.projectConfig)
         self.useBackground          = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
         self.useDocInfo             = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
 
@@ -245,7 +244,7 @@ class Pdftk (Manager) :
                     self.log.writeToLog(self.errorCodes['5020'], [self.tools.fName(viewFile)])
 
             if os.path.isfile(viewFile) :
-                if not len(self.pdfViewerCmd[0]) == 0 :
+                if self.pdfViewerCmd :
                     # Add the file to the viewer command
                     self.pdfViewerCmd.append(viewFile)
                     # Run the XeTeX and collect the return code for analysis
