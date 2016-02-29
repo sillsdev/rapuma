@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: macro.xml
+Description:
+This is a component type description for the macro manager. It contains default
+information for macro(s) used in this publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+
+    <section>
+        <name>Project Macros</name>
+        <sectionID>Macros</sectionID>
+        <description>This is the section where macro information is kept.</description>
+    
+    </section>
+
+</root>
+

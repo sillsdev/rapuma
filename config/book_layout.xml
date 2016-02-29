@@ -1,0 +1,431 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!--
+File: book_layout.xml
+Description:
+This contains all the layout and format values for a book publication.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This contains general format settings for UsfmTex macro package.</description>
+        <setting>
+            <name>Measurement Unit</name>
+            <key>measurementUnit</key>
+            <description>The unit of measurement used in this publication.</description>
+            <type>string</type>
+            <value>mm</value>
+        </setting>
+        <setting>
+            <name>Source Encoding Transform</name>
+            <description>In the case of multi-script projects or non-Unicode, an encoding transformation may be needed make the source data useful to the system.  The encoding information is stored in the Encoding section and should be the same as other files used in this project. (Default = False)</description>
+            <key>sourceEncodeTransform</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+    </section>
+    <section>
+        <name>Page Layout</name>
+        <sectionID>PageLayout</sectionID>
+        <description>Page layout information.  This covers general page layout format options.</description>
+        <setting>
+            <name>Printer Page Size ID Code</name>
+            <description>For print output to a common printer a page size ID has to be identified. If no size is specified (null/none) the printer page size will be the same as the document. Two page sizes are supported, A4 and US Letter. Default = A4</description>
+            <key>printerPageSizeCode</key>
+            <type>string</type>
+            <value>A4</value>
+        </setting>
+        <setting>
+            <name>Page Size ID Code</name>
+            <description>If you are using a common page size please enter the standard code.  If a custom size is being used just enter "custom". Default = A5</description>
+            <key>pageSizeCode</key>
+            <type>string</type>
+            <value>A5</value>
+        </setting>
+        <setting>
+            <name>Page Height</name>
+            <description>This is the height of the page after it has been printed and trimmed to its final size. Default = 210mm (A5)</description>
+            <key>pageHeight</key>
+            <type>integer</type>
+            <value>210</value>
+        </setting>
+        <setting>
+            <name>Page Width</name>
+            <description>This is the width of the page after it has been printed and trimmed to its final size. Default = 148mm (A5)</description>
+            <key>pageWidth</key>
+            <type>integer</type>
+            <value>148</value>
+        </setting>
+        <setting>
+            <name>Top Margin</name>
+            <description>The distance from the top of the page to the printable text area. Default = 15</description>
+            <key>topMargin</key>
+            <type>integer</type>
+            <value>15</value>
+        </setting>
+        <setting>
+            <name>Bottom Margin</name>
+            <description>The distance from the bottom of the page to the printable text area. Default = 10</description>
+            <key>bottomMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Inside Margin</name>
+            <description>The distance from the inside of the page (gutter) to the printable text area. Default = 10</description>
+            <key>insideMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Outside Margin</name>
+            <description>The distance from the outside of the page (left or right) to the printable text area. Default = 10</description>
+            <key>outsideMargin</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Body Columns (Two)</name>
+            <description>The number of columns used for body text. Default = 2 (True)</description>
+            <key>bodyColumnsTwo</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Introduction Columns (Two)</name>
+            <description>The number of columns used for introduction text. Default = 1 (False)</description>
+            <key>introColumnsTwo</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Title Columns (Two)</name>
+            <description>The number of columns used for book title text. Default = 1 (False)</description>
+            <key>titleColumnsTwo</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Header Position</name>
+            <description>Relative position of the baseline of the header to the top edge of the paper (not the text area)   Default = 5mm</description>
+            <key>headerPosition</key>
+            <type>integer</type>
+            <value>5</value>
+        </setting>
+        <setting>
+            <name>Footer Position</name>
+            <description>Relative position of the baseline of the footer to the bottom edge of the paper (not the text area)   Default = 5mm</description>
+            <key>footerPosition</key>
+            <type>integer</type>
+            <value>5</value>
+        </setting>
+    </section>
+
+
+    <section>
+        <name>Document Features</name>
+        <sectionID>DocumentFeatures</sectionID>
+        <description>Various features used in this document/publication.</description>
+
+        <setting>
+            <name>Use PDF-X1a Output</name>
+            <description>If this is set to true, XeTeX should output all the necessary header information to make the document comply to the PDF X1a standard for printing. Default = True</description>
+            <key>pdfX1a</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Use Document Information</name>
+            <description>If this is set to true, document information will be added in header and footer lines. This information will be merged with the typeset page. This is independent to the background merge operation. Default = False</description>
+            <key>useDocInfo</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Document Information Text</name>
+            <description>Text that can be added to the footer, used along with other document information. This is optional information.</description>
+            <key>docInfoText</key>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Use Diagnostic</name>
+            <description>If this is set to true, diagnostic components (as per the Diagnostic components list) will be superimposed over the page contents to enable checking for various problems with the layout of the page contents. This is done with a similar process as adding page a background but is not the same thing. Default = False</description>
+            <key>useDiagnostic</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Regenerate Transparency</name>
+            <description>If this is set to true, any exsisting transparency (diagnostic) file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
+            <key>regenerateTransparency</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Diagnostic Components</name>
+            <description>Diagnostic components to be superimposed on the contents of a page used to diagnose format issues. Currently supported components are, leading. Default = leading</description>
+            <key>diagnosticComponents</key>
+            <type>list</type>
+            <value>leading</value>
+        </setting>
+        <setting>
+            <name>Use Background</name>
+            <description>If this is set to true, a background (or watermark) will be merged with the typeset page. Multiple backgrounds can be defined in the backgroundComponents field. Default = False</description>
+            <key>useBackground</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Regenerate Background</name>
+            <description>If this is set to true, any exsisting background file will be deleted and a new/fresh one will be regenerated. If false, the existing one will be used, or, if it doesn't exist, one will be created. Default = False</description>
+            <key>regenerateBackground</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Background Components</name>
+            <description>Components to be used for a document. Currently the following are supported: watermark, cropmarks, lines, and pagebox. Default = watermark</description>
+            <key>backgroundComponents</key>
+            <type>list</type>
+            <value>watermark</value>
+        </setting>
+        <setting>
+            <name>Watermark Text</name>
+            <description>Text to be used for the watermark background. Default = DRAFT</description>
+            <key>watermarkText</key>
+            <type>string</type>
+            <value>DRAFT</value>
+        </setting>
+
+        <setting>
+            <name>Use Running Header Rule</name>
+            <description>If this is set to true a rule will be placed in the header according to the Running Header Rule Position.   Default = False</description>
+            <key>useRunningHeaderRule</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Running Header Rule Position</name>
+            <description>Position of rule under the running head if used.  It is measured from the baseline of the header.  Default = 4mm</description>
+            <key>runningHeaderRulePosition</key>
+            <type>integer</type>
+            <value>4</value>
+        </setting>
+        <setting>
+        <setting>
+            <name>Include Footnotes</name>
+            <description>[NOT IMPLEMENTED] Include footnotes in the output. Defalt = True</description>
+            <key>includeFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+            <name>Use Footnote Rule</name>
+            <description>Set to true to be able to use a footnote rule that goes between the body text and footnotes.</description>
+            <key>useFootnoteRule</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Column Gutter Rule</name>
+            <description>Do you want to place a vertical line between the columns in the column gutter?   Default = False</description>
+            <key>columnGutterRule</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Use Special Callers (Footnotes)</name>
+            <description>If set to true, a symbol or a csv sequence of symbols is needed for footnotes. Default = False</description>
+            <key>useSpecialCallerFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Special Callers (Footnotes)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a footnote caller character, rather than the default incremental character(s).   Default = \kern0.2em *\kern0.4em</description>
+            <key>specialCallerFootnotes</key>
+            <type>string</type>
+            <value>\kern0.2em *\kern0.4em</value>
+        </setting>
+
+        <setting>
+            <name>Use Special Callers (Crossreferences)</name>
+            <description>If set to true, a symbol or a csv sequence of symbols is needed for crossreference. Default = False</description>
+            <key>useSpecialCallerCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Special Callers (Crossreferences)</name>
+            <description>Provide a symbol (or a csv sequence of symbols) is desired for a crossreference caller character, rather than the default incremental character(s). Default = \kern0.2em *\kern0.4em</description>
+            <key>specialCallerCrossrefs</key>
+            <type>string</type>
+            <value>\kern0.2em *\kern0.4em</value>
+        </setting>
+
+        <setting>
+            <name>Numeric Callers (Footnotes)</name>
+            <description>Use numeric callers on footnote references instead of alphabetic callers.   Default = False</description>
+            <key>useNumericCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Page Reset Callers (Footnotes)</name>
+            <description>Restart numbering or character sequence for footnotes on each page.   Default = False</description>
+            <key>pageResetCallersFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Omit Caller In Footnotes</name>
+            <description>To omit caller characters from the footnotes at the bottom of the page.</description>
+            <key>omitCallerInFootnotes</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Omit Caller In Crossreferences</name>
+            <description>To omit caller characters from the crossreferences at the bottom of the page.</description>
+            <key>omitCallerInCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Paragraphed Footnotes</name>
+            <description>Output the footnotes on the bottom of the page in paragraph format rather than one line for each one. Default = True</description>
+            <key>paragraphedFootnotes</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Paragraphed Crossreferences</name>
+            <description>Output the crossreferences on the bottom of the page in paragraph format rather than one line for each one. Default = True</description>
+            <key>paragraphedCrossrefs</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+
+        <setting>
+            <name>Use Running Header</name>
+            <description>Set this to true if you want to have a running header line in your document. (Defalt = True)</description>
+            <key>useRunningHeader</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Use Running Footer</name>
+            <description>Set this to true if you want to have a running footer line in your document. (Defalt = False)</description>
+            <key>useRunningFooter</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Figure Placeholders</name>
+            <description>Turn On Figure Placeholders - If set to true, the actual picture graphic will not be output, rather a spaceholder will be output in its place. This makes processing much faster. Default = True</description>
+            <key>useFigurePlaceHolders</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+
+        <setting>
+            <name>Captions</name>
+            <description>Add a caption to the illustration.  Set as True if you want captions included with illustrations. Default = True</description>
+            <key>useCaptions</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Caption Reference</name>
+            <description>Add illustration reference to caption.  Set as true if you want a reference added to the caption. Default = True</description>
+            <key>useCaptionReferences</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+
+        <setting>
+            <name>Use Auto Callers (Crossrefs)</name>
+            <description>Set to true if a symbol or a csv sequence of symbols is needed for crossreferences. Default = True</description>
+            <key>useAutoCallerCrossrefs</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Numeric Callers (Crossrefs)</name>
+            <description>Use numeric callers on cross references instead of alphabetic callers. Default = False</description>
+            <key>useNumericCallersCrossrefs</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+        <setting>
+            <name>Use Hanging Punctuation</name>
+            <description>Turn on hanging punctuation. This is where various punctuation characters which come at the end of a line will be positioned just outside the margin of the text. Default = False</description>
+            <key>useHangingPunctuation</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+
+    </section>
+
+
+    <section>
+        <name>Text Elements</name>
+        <sectionID>TextElements</sectionID>
+        <description>General settings for text level elements</description>
+        <setting>
+            <name>Justify Paragraphs</name>
+            <description>Paragraphs are justified by default.  Set this to false to turn off justification.   Default = True</description>
+            <key>justifyParagraphs</key>
+            <type>boolean</type>
+            <value>True</value>
+        </setting>
+        <setting>
+            <name>Right To Left</name>
+            <description>Uncomment to use right-to-left text layout mode   Default = False</description>
+            <key>rightToLeft</key>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>Body Text Font Size</name>
+            <description>The size, in points, of the body text. Enter only an integer. Default = 10 points</description>
+            <key>bodyFontSize</key>
+            <type>integer</type>
+            <value>10</value>
+        </setting>
+        <setting>
+            <name>Body Text Leading</name>
+            <description>The size, in points, of the body text leading. Enter only an integer. Default = 12 points</description>
+            <key>bodyTextLeading</key>
+            <type>integer</type>
+            <value>12</value>
+        </setting>
+        <setting>
+            <name>Font Default Size</name>
+            <description>The default size value in points (pt) of the body text. Do NOT add "pt" to indicate value in points, that is assumed. This is the point size set in the usfm.sty for \p, \m, \q, etc. This is used by macro functions to calulate different settings for this macro package do not change this unless you know what you are doing. Defalt size is 12pt.</description>
+            <key>fontDefaultSize</key>
+            <type>integer</type>
+            <value>12</value>
+        </setting>
+        <setting>
+            <name>Body Text Default Leading</name>
+            <description>The default size value in points (pt) of the body text leading. Do NOT add "pt" to indicate value in points, that is assumed. This is the default leading used for line spacing with \p, \m, \q, etc. This is used by macro functions to calulate different settings for this macro package do not change this unless you know what you are doing. Defalt size is 14pt.</description>
+            <key>leadingDefaultSize</key>
+            <type>integer</type>
+            <value>14</value>
+        </setting>
+    </section>
+</root>
+

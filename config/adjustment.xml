@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+File: hyphenation.xml
+Description:
+This is a component type description for the font manager. It contains default
+information for a font type manager and acts as a template for managers created
+in a type of publication. This information goes in the project configuration.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+    <section>
+        <name>General Settings</name>
+        <sectionID>GeneralSettings</sectionID>
+        <description>This section contains general adjustment information and settings for this project.</description>
+        <setting>
+            <name>Last Edit Time and Date</name>
+            <description>The date and time of the last time this file was edited.</description>
+            <key>lastEdit</key>
+            <type>string</type>
+            <value></value>
+        </setting>
+    </section>
+</root>
+
