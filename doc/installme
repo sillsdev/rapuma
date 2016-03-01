@@ -92,7 +92,9 @@ This will create a folder named rapuma in the Projects folder. The master branch
 4) PACKAGE INSTALLATION AND SETUP
 -------------------------------------------------------------------------------
 
-Like the palaso.python setup you will use the setup.py script. With a terminal in the root of the rapuma repository on your local machine, run:
+Like the palaso.python setup you will use the setup.py script. However, before you can run this script, you need to make some adjustments for your instalation. The file that needs to be edited can be found in /rapuma/config/system.ini. Open the file in your favorite text editor and find the System section and change the "userID" value from "Default User" to whatever is apropreate. Next, and more importantly, find the Resources section and the "projects" key. For Rapuma to work, it needs to know the folder on the local system where projects will be kept. Rapuma doesn't allow for projects to be kept in more than a single location. If nothing or an invalid path is given, Rapuma will throw an error. Enter a good value, save the file, and close it. Now you are ready to install Rapuma.
+
+Now, in a terminal, run these commands:
 
     cd ~/Projects/rapuma
     ./setup.py build
