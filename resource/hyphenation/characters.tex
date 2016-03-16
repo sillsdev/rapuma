@@ -1,0 +1,47 @@
+% File: characters.tex
+
+% The data in this file is for the purpose of driving the hyphenation
+% process in this project. Comments are made below to guide in the
+% adding or changing data. Please refer to the documentation for more
+% details on how to make changes or how the process works.
+
+% For hyphenation to take place, TeX needs to know what characters
+% do, and do not, form words. In this file these characters (or letters)
+% are defined. The two primary TeX commands used here are \lccode, for
+% lower case characters, and \uccode for upper case characters. Brief
+% comments are made. For more information on the use of these and other
+% character definition commands, please consult "The TeXbook" by Donald
+% Knuth, the author of TeX.
+
+% These are standard non-word-forming characters like punctuation and
+% other such characters found in the text to be typeset. Edit as needed
+% for your writing system. The characters in this list are defined as
+% lower case (\lccode) and they are "turned off" with 0 (zero). The code
+% used is a Unicode value proceeded by a double quote (").
+\lccode "201C = 0
+\lccode "201D = 0
+\lccode "2018 = 0
+\lccode "2019 = 0
+\lccode "0028 = 0
+\lccode "0029 = 0
+\lccode "002C = 0
+\lccode "002E = 0
+\lccode "0021 = 0
+\lccode "003F = 0
+\lccode "002A = 0
+
+% In this list we define any non-word forming characters that are
+% specifically part of the writing system you are using. The format
+% is the same as above.
+%\lccode "A92E = 0
+
+% The following are necessary, specify word-forming characters for
+% the writing system used in this project. If there is case
+% distinction be sure to mark lower case characters with \lccode
+% and upper case characters with \uccode. Often case distinction
+% is found in Latin-based writing systems.This list can get fairly
+% fairly long. See the TeX Book for more information.
+%\lccode "0061 = "0061
+%\uccode "0041 = "0041
+
+
