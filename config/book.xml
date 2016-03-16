@@ -101,6 +101,13 @@ Todo:
             <value></value>
         </setting>
         <setting>
+            <name>Script Code</name>
+            <key>scriptCode</key>
+            <description>The ISO writing system code for the primary language of this publication.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
             <name>Publication Start Date</name>
             <key>startDate</key>
             <description>The date this publication was started.</description>
@@ -113,6 +120,13 @@ Todo:
             <description>The date this publication was finished.</description>
             <type>string</type>
             <value></value>
+        </setting>
+        <setting>
+            <name>Turn On Hyphenation</name>
+            <key>hyphenationOn</key>
+            <description>Turn on the use of hyphenation when rendering groups that have been specified for this project. The default is True but it can be turned off in case debugging or some kind of testing is needed.</description>
+            <type>boolean</type>
+            <value>True</value>
         </setting>
     </section>
     <section>

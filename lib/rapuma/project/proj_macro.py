@@ -94,29 +94,6 @@ class Macro (object) :
                         '':'', '':'', '':'', '':'', '':''}
 
 
-        #<file>
-            #<name>TeX lccode Definition File</name>
-            #<description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
-            #<fileID>lccodeTexFile</fileID>
-            #<fileName>[self:gid]-lccode.tex</fileName>
-            #<filePath>[self:projGidFolder]</filePath>
-            #<depends></depends>
-            #<relies></relies>
-            #<note>This file is located in the component group folder to allow more segregated processing.</note>
-        #</file>
-        #<file>
-            #<name>TeX Group Hyphenation Exclusions File</name>
-            #<description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
-            #<fileID>grpHyphExcTexFile</fileID>
-            #<fileName>[self:gid]-hyphenation.tex</fileName>
-            #<filePath>[self:projGidFolder]</filePath>
-            #<depends></depends>
-            #<relies></relies>
-            #<note>This file is located in the component group folder to allow more segregated processing.</note>
-        #</file>
-
-
-
     def getMacPackIdFromFileName (self, fileName) :
         '''Return the macPack ID based on the file name'''
 

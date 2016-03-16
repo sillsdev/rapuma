@@ -14,6 +14,20 @@ Todo:
 
 <root>
     <setting>
+        <name>Group Language Code</name>
+        <key>groupLanguageCode</key>
+        <description>The ISO langage code for this group. By default, unless otherwise specified, this will be the same as the project language code.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
+        <name>Group Script Code</name>
+        <key>groupScriptCode</key>
+        <description>The ISO writing system code for this group. By default, unless otherwise specified, this will be the same as the project script code.</description>
+        <type>string</type>
+        <value></value>
+    </setting>
+    <setting>
         <name>Validate Source Text Markup</name>
         <key>validateSourceMarkup</key>
         <description>Run a basic markup validation check on the incoming source text.</description>
@@ -79,7 +93,7 @@ Todo:
     <setting>
         <name>Use Group Hyphenation</name>
         <key>useHyphenation</key>
-        <description>Use hyphenation on group text.</description>
+        <description>Use hyphenation on text in the context of this group. Once set, normally this setting will not change unless it is determined that it really is not needed for this particular group. If it is necessary to "turn off" the hyphenation feature, please use "hyphenationOn" under the ProjectInfo section.</description>
         <type>boolean</type>
         <value>False</value>
     </setting>

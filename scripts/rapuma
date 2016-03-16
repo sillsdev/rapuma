@@ -106,6 +106,7 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_script         import ProjScript
 from rapuma.project.proj_diagnose       import ProjDiagnose
@@ -514,7 +515,7 @@ def userArguments (args) :
         source      = ''
         cType       = ''
         # Check GID
-        if cmd != 'font' and cmd != 'macro' :
+        if cmd != 'font' and cmd != 'macro' and cmd != 'hyphenation' :
             if not ProjSetup(sysConfig, pid).isGroup(gid) :
                 sys.exit('\nERROR: Group ID is not valid: [' + gid + '] Process halting.\n')
         # Path set and test for existance of file or folder
@@ -549,6 +550,13 @@ def userArguments (args) :
             # Update a font in the project
             elif sub == 'update' :
                 ProjFont(pid).updateFontPack(path, cType)
+        elif cmd == 'hyphenation' :
+            if sub == 'add' :
+                ProjHyphenation(pid).addHyphenationFiles(path)
+            elif sub == 'remove' :
+                ProjHyphenation(pid).removeHyphenationFiles()
+            elif sub == 'update' :
+                ProjHyphenation(pid).updateHyphenationFiles(path)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 ProjIllustration(pid, gid).addIllustrationFiles(path)
@@ -605,7 +613,6 @@ def userArguments (args) :
         background  = args.background
         diagnostic  = args.diagnostic
         docInfo     = args.doc_info
-        hyphenation = args.hyphenation
         save        = args.save
         pages       = args.pages
         override    = args.override
@@ -655,17 +662,12 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     # First we will set whatever peripheral features to what
                     # they need to be. After we will turn them off.
-                    # Hyphenation can be run in any case
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
                     # Now we will render
                     Project(pid, gid).renderGroup(cidList, pages, override, save)
                     # Just to be safe we will just turn everything off
                     resetOutputBackgroundFeatures(pid)
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
@@ -693,17 +695,12 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     # First we will set whatever peripheral features to what
                     # they need to be. After we will turn them off.
-                    # Hyphenation can be run in any case
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
                     # Now we will render
                     Project(pid, gid).renderGroup(None, pages, override, save)
                     # Just to be safe we will just turn everything off
                     resetOutputBackgroundFeatures(pid)
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
@@ -833,7 +830,7 @@ if __name__ == '__main__' :
     ctCompType         = ['usfm', 'pdf']
     flType             = ['backup', 'source']
     # Asset
-    asCmd              = ['background', 'font', 'illustration', 'macro', 'script']
+    asCmd              = ['background', 'font', 'hyphenation', 'illustration', 'macro', 'script']
     asSubCmd           = ['add', 'remove', 'update']
     # Processes
     pcCmd              = ['component', 'group', 'project']
@@ -888,7 +885,6 @@ if __name__ == '__main__' :
     processCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
     processCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
     processCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
-    processCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
     processCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     processCommand.add_argument('-s', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
     processCommand.add_argument('-a', '--pages', help='Specify a page number or range of pages to render.')

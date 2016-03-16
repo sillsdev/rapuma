@@ -252,6 +252,8 @@ class ProjLocal (object) :
         '''Once we are sure we have a single placeholder (noting embedded) this
         will process it and replace it with the correct value.'''
 
+#        import pdb; pdb.set_trace()
+
         holderType = ph.split(':')[0]
         try :
             holderKey = ph.split(':')[1]

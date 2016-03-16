@@ -29,6 +29,7 @@ from rapuma.project.proj_background     import ProjBackground
 from rapuma.project.proj_diagnose       import ProjDiagnose
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_illustration   import ProjIllustration
+from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.group.usfmTex               import UsfmTex
 from rapuma.group.usfm_data             import UsfmData
 
@@ -74,6 +75,7 @@ class Xetex (Manager) :
         # Bring in some manager objects we will need
         self.proj_font              = ProjFont(self.pid)
         self.proj_illustration      = ProjIllustration(self.pid, self.gid)
+        self.proj_hyphenation       = ProjHyphenation(self.pid, self.gid)
         self.usfmData               = UsfmData()
         self.cidChapNumDict         = self.usfmData.cidChapNumDict()
         self.cidPtIdDict            = self.usfmData.cidPtIdDict()
@@ -103,7 +105,7 @@ class Xetex (Manager) :
         # Set some Booleans (this comes after persistant values are set)
         # In case the macro is not installed we need to skip over this
         try :
-            self.useHyphenation         = self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation'])
+            self.useHyphenation         = self.tools.str2bool(self.projectConfig['ProjectInfo']['hyphenationOn'])
             self.chapNumOffSingChap     = self.tools.str2bool(self.macroConfig['Macros'][self.macPackId]['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
         except :
             self.useHyphenation         = None
@@ -149,23 +151,11 @@ class Xetex (Manager) :
             '0730' : ['ERR', 'Failed to save rendered file to: [<<1>>]'],
 
             '1000' : ['WRN', 'XeTeX debugging is set to [<<1>>]. These are the paths XeTeX is seeing: [<<2>>]'],
-            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32'],
-
-            '2000' : ['ERR', 'TeX hyphenation file [<<1>>] not found. Either find that file or turn off hyphenation. Process halted.']
+            '1090' : ['ERR', 'Invalid value [<<1>>] used for XeTeX debugging. Must use an integer of 0, 1, 2, 4, 8, 16, or 32']
 
         }
 
-        # Do a check for dependent files
-        # Note that other checks like this done below could be moved here
-        # In the case of hyphenation, the current model expects that the
-        # hyphen exclusions and lccode files are generated externally
-        # and imported into the project. If hyphenation is turned on and
-        # one of these files are missing, the process is halted.
-        if self.useHyphenation :
-            if not os.path.exists (self.local.grpHyphExcTexFile) :
-                self.log.writeToLog(self.errorCodes['2000'], [self.tools.fName(self.local.grpHyphExcTexFile)])
-            if not os.path.exists (self.local.lccodeTexFile) :
-                self.log.writeToLog(self.errorCodes['2000'], [self.tools.fName(self.local.lccodeTexFile)])
+        # FIXME: It would be good if we could do a check for dependent files here
 
 
 ###############################################################################
@@ -488,8 +478,12 @@ class Xetex (Manager) :
                 gidTexObject.write('\\input \"' + self.local.grpExtTexFile + '\"\n')
             # Load hyphenation data if needed
             if self.useHyphenation :
-                gidTexObject.write('\\input \"' + self.local.lccodeTexFile + '\"\n')
-                gidTexObject.write('\\input \"' + self.local.grpHyphExcTexFile + '\"\n')
+                # This is the main hyphenation settings file, this must be loaded first
+                gidTexObject.write('\\input \"' + self.proj_hyphenation.projHyphSetTexFile + '\"\n')
+                # This is the character definition file for hyphenation, this should be loaded second
+                gidTexObject.write('\\input \"' + self.proj_hyphenation.projHyphCharTexFile + '\"\n')
+                # This is the exception words list (all the hyphenated words), this is loaded last
+                gidTexObject.write('\\input \"' + self.proj_hyphenation.projHyphExcTexFile + '\"\n')
             # If this is less than a full group render, just go with default pg num (1)
             if cidList == self.projectConfig['Groups'][self.gid]['cidList'] :
                 # Check if this setting is there

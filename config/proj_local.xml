@@ -57,6 +57,13 @@ Todo:
             <relies>rapumaHome</relies>
         </folder>
         <folder>
+            <name>Rapuma Resource Hyphenation Folder</name>
+            <description>The Rapuma resource hyphenation folder is where system hyphenation resources are kept.</description>
+            <folderID>rapumaHyphenationFolder</folderID>
+            <folderPath>[self:rapumaResourceFolder][pathSep]hyphenation</folderPath>
+            <relies>rapumaHome</relies>
+        </folder>
+        <folder>
             <name>Rapuma Resource Macro Folder</name>
             <description>The Rapuma resource macro folder where various Rapuma system resources are kept.</description>
             <folderID>rapumaMacroFolder</folderID>
@@ -129,7 +136,7 @@ Todo:
             <folderPath>[self:projHome][pathSep]Deliverable</folderPath>
             <relies>projHome</relies>
         </folder>
-       <folder>
+        <folder>
             <name>Project Style Folder</name>
             <description>The folder were project style files are kept.</description>
             <folderID>projStyleFolder</folderID>
@@ -183,6 +190,13 @@ Todo:
             <description>The folder where project illustration files are kept.</description>
             <folderID>projIllustrationFolder</folderID>
             <folderPath>[self:projHome][pathSep]Illustration</folderPath>
+            <relies>projHome</relies>
+        </folder>
+        <folder>
+            <name>Project Hyphenation Folder</name>
+            <description>The folder where project hyphenation files are kept.</description>
+            <folderID>projHyphenationFolder</folderID>
+            <folderPath>[self:projHome][pathSep]Hyphenation</folderPath>
             <relies>projHome</relies>
         </folder>
 
@@ -323,24 +337,34 @@ Todo:
             <relies></relies>
         </file>
         <file>
-            <name>TeX lccode Definition File</name>
-            <description>The TeX file that contains lccode definitions and is linked with the hypenation exclusions file.</description>
-            <fileID>lccodeTexFile</fileID>
-            <fileName>[self:gid]_lccode.tex</fileName>
-            <filePath>[self:projGidFolder]</filePath>
+            <name>Rapuma Character Definition File</name>
+            <description>This is a model TeX file that contains place holders for character definitions for language and writing system.</description>
+            <fileID>rpmHyphCharTexFile</fileID>
+            <fileName>characters.tex</fileName>
+            <filePath>[self:rapumaHyphenationFolder]</filePath>
             <depends></depends>
             <relies></relies>
-            <note>This file is located in the component group folder to allow more segregated processing.</note>
+            <note>This file is located in the rapuma resources hyphenation folder.</note>
         </file>
         <file>
-            <name>TeX Group Hyphenation Exclusions File</name>
-            <description>The file that contains the hypenation words exclusions list for the current group that TeX will use to render the text.</description>
-            <fileID>grpHyphExcTexFile</fileID>
-            <fileName>[self:gid]_hyphenation.tex</fileName>
-            <filePath>[self:projGidFolder]</filePath>
+            <name>Rapuma Word Exclusions File</name>
+            <description>This is a model file for TeX hyphenation which will contain the hypenation words exclusions list for a specific language and writing system. XeTeX will use this data to make line breaks while rendering the text if hyphenation is being used.</description>
+            <fileID>rpmHyphExcTexFile</fileID>
+            <fileName>exceptions.tex</fileName>
+            <filePath>[self:rapumaHyphenationFolder]</filePath>
             <depends></depends>
             <relies></relies>
-            <note>This file is located in the component group folder to allow more segregated processing.</note>
+            <note>This file is located in the rapuma resources hyphenation folder.</note>
+        </file>
+        <file>
+            <name>Rapuma Hyphenation Settings File</name>
+            <description>This is a model file for TeX hyphenation which will contain the hypenation settings for a specific language and writing system in a publication. XeTeX will use this data to make line breaks while rendering the text if hyphenation is being used.</description>
+            <fileID>rpmHyphSetTexFile</fileID>
+            <fileName>hyphenation.tex</fileName>
+            <filePath>[self:rapumaHyphenationFolder]</filePath>
+            <depends></depends>
+            <relies></relies>
+            <note>This file is located in the rapuma resources hyphenation folder.</note>
         </file>
         <file>
             <name>Rapuma Preprocess Script File</name>
