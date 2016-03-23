@@ -124,7 +124,7 @@ uc                                      = UserConfig()
 tools                                   = Tools()
 
 # Get a list of projects
-projDir = os.path.expanduser(uc.userConfig['Resources']['projects'])
+projDir = os.path.expanduser(uc.userConfig['System']['projects'])
 if projDir and os.path.exists(projDir) :
     projList = tools.getProjIdList(projDir)
 else :

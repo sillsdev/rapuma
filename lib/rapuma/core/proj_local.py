@@ -51,7 +51,7 @@ class ProjLocal (object) :
         self.user               = UserConfig()
         self.userConfig         = self.user.userConfig
         self.userResource       = os.path.join(site.USER_BASE, 'share', 'rapuma')
-        self.projHome           = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        self.projHome           = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
         self.projFolders        = []
         self.localDict          = None
         self.macPackId          = None

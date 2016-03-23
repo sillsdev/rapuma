@@ -98,7 +98,7 @@ Todo:
             <name>Project Parent Default Folder</name>
             <description>The parent default folder this project could be located in.</description>
             <folderID>projParentDefaultFolder</folderID>
-            <folderPath>[config:userConfig|Resources|projects]</folderPath>
+            <folderPath>[config:userConfig|System|projects]</folderPath>
             <relies>userResource</relies>
         </folder>
         <folder>

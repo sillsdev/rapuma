@@ -40,7 +40,7 @@ class Config (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
+        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
         self.local                          = ProjLocal(pid, gid)
         self.tools                          = Tools()
         self.log                            = ProjLog(pid)

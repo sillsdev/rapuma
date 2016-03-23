@@ -35,7 +35,7 @@ class ProjCommander (object) :
         self.tools                  = Tools()
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.projHome               = os.path.join(self.userConfig['System']['projects'], self.pid)
         self.local                  = ProjLocal(self.pid)
         self.proj_config            = Config(pid)
         self.proj_config.getProjectConfig()

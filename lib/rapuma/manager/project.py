@@ -41,7 +41,7 @@ class Project (object) :
         self.gid                    = gid
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.projHome               = os.path.join(self.userConfig['System']['projects'], self.pid)
         self.config                 = Config(self.pid)
         self.config.getProjectConfig()
         self.projectConfig          = self.config.projectConfig

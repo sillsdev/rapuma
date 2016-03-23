@@ -19,11 +19,11 @@ Set your user ID (no spaces) with...
 
 Set the default path to your publishing projects folder (change path as necessary):
 
-    rapuma setting system rapuma --section Resources --key projects --value "~/Publishing"
+    rapuma setting system rapuma --section System --key projects --value "~/Publishing"
 
 Set the path to the "Cloud" (Internet storage like Dropbox):
 
-    rapuma setting system rapuma --section Resources --key cloud --value "~/Dropbox/MSEAG_Publishing"
+    rapuma setting system rapuma --section System --key cloud --value "~/Dropbox/Publishing"
 
 This completes the basic setup routine for Rapuma. Now you can try the examples.
 

@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!--
+File: rapuma.xml
+Description:
+This is the main Rapuma system description file.  This contains data to describe
+various aspects of the type system.  However, it does not describe projects or
+components.
+
+Todo:
+1) Need to connect to an external DTD, schema, whatever for validation.
+
+-->
+
+
+<root>
+
+    <section>
+
+        <name>System</name>
+        <sectionID>System</sectionID>
+        <description>These are configurable system settings. Change them only if you know what you are doing!</description>
+        <setting>
+            <name>Debugging</name>
+            <key>debugging</key>
+            <description>If set to true, reporting will be verbose and all events will be recorded to the log file for the purpose of debugging errors.</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>User Name</name>
+            <key>userName</key>
+            <description>The name of the person using this system.</description>
+            <type>string</type>
+            <value>Default User</value>
+        </setting>
+        <setting>
+            <name>User Identification</name>
+            <key>userID</key>
+            <description>The identification tag of the person using this system.</description>
+            <type>string</type>
+            <value>default_user</value>
+        </setting>
+        <setting>
+            <name>Interface Language ID Code</name>
+            <key>langID</key>
+            <description>The language ID code that sets the language to be used in the user interface.</description>
+            <type>string</type>
+            <value>ENG</value>
+        </setting>
+        <setting>
+            <name>Log File Length</name>
+            <key>projLogLineLimit</key>
+            <description>This is the maximum number of lines that will be permited to be in the log file. This is necessary because Rapuma records all events in one log file.</description>
+            <type>integer</type>
+            <value>1000</value>
+        </setting>
+        <setting>
+            <name>System Initialization Date</name>
+            <key>initDate</key>
+            <description>Time stamp of when the system was installed.</description>
+            <type>string</type>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Auto-Create Helper Scripts</name>
+            <key>autoHelperScripts</key>
+            <description>Automatically create auto-helper scripts on project creation. (This is being deprecated and may not work correctly.)</description>
+            <type>boolean</type>
+            <value>False</value>
+        </setting>
+        <setting>
+            <name>SVG to PDF Converter Command</name>
+            <key>svgPdfConvertCommand</key>
+            <description>The command needed to convert a SVG file to PDF. Mostly used for creating backgound watermark files. Input and output filenames are represented by these key terms: svgInFile and pdfOutFile. Use those along with any other application-specific commands. The default setting is for the rsvg-convert utility.</description>
+            <type>list</type>
+            <value>rsvg-convert,-f,pdf,-o,pdfFile,svgFile</value>
+        </setting>
+        <setting>
+            <name>Text Differential Viewer Command</name>
+            <key>textDifferentialViewerCommand</key>
+            <description>The command needed to view a comparison between the current working file and its source.</description>
+            <type>list</type>
+            <value>meld</value>
+        </setting>
+        <setting>
+            <name>PDF Viewer Command</name>
+            <key>pdfViewerCommand</key>
+            <description>The default command needed to view PDF documents produced by the system. This can be changed at the component manager level.</description>
+            <type>list</type>
+            <value>evince,</value>
+        </setting>
+        <setting>
+            <name>PDF Utility Command</name>
+            <key>pdfUtilityCommand</key>
+            <description>The default command needed to operate the PDF manipulation utility. Note that currently Rapuma only supports pdftk.</description>
+            <type>list</type>
+            <value>pdftk</value>
+        </setting>
+        <setting>
+            <name>Recognized Component Types</name>
+            <key>recognizedComponentTypes</key>
+            <description>A list of valid component types that are recognized by the Rapuma system.</description>
+            <type>list</type>
+            <value>usfm,map</value>
+        </setting>
+        <setting>
+            <name>Maximum Stored Backups</name>
+            <key>maxStoreBackups</key>
+            <description>The maximum number of backups that can be stored in the project backup folder.</description>
+            <type>int</type>
+            <value>5</value>
+        </setting>
+        <setting>
+            <name>Default Projects Path</name>
+            <key>projects</key>
+            <description>The full path to where projects are kept. The default is set for deployment on a Debian server. Adjust for other environments.</description>
+            <type>string</type>
+            <value>~/Publishing</value>
+        </setting>
+        <setting>
+            <name>Path To Cloud Portal</name>
+            <key>cloud</key>
+            <description>The full path to the local cloud portal. This would be a folder that is linked to a file share system and allows project data to be backed up off-site.</description>
+            <type>string</type>
+            <value>~/Dropbox/Publishing</value>
+        </setting>
+
+    </section>
+
+</root>
+

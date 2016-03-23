@@ -30,16 +30,32 @@ class UserConfig (object) :
 #        import pdb; pdb.set_trace()
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
-        self.defaultUserHome    = os.getcwd()
-        self.userConfFileName   = 'system.ini'
+        self.defaultUserHome    = os.environ.get('RAPUMA_USER')
+        self.userConfFileName   = 'rapuma.conf'
         self.tools              = Tools()
 
-        # Regardless of what environment Rapuma is deployed, the user/system
-        # config file is located with the program rather then the traditional
-        # location of ~/.config/rapuma Doing it this way requires the user
-        # to preconfigure the system.ini file before runing the setup.py
-        # script to install Rapuma.
-        self.userConfFile           = os.path.join(self.defaultUserHome, 'config', self.userConfFileName)
+        # Point to the right user config
+        # Look for a web installation first, if not go to default
+        # Note that a slash is put before var as it is off of root
+        # That kind of stops this from being cross-platform
+        rapumaWebConfig         = os.path.join('/var', 'lib', 'rapuma', 'config', self.userConfFileName)
+        defaultConfig           = os.path.join(self.defaultUserHome, self.userConfFileName)
+        if os.path.exists(rapumaWebConfig) :
+            self.userConfFile   = rapumaWebConfig
+        else :
+            self.userConfFile   = defaultConfig
+
+        # Check to see if the file is there, then read it in and break it into
+        # sections. If it fails, scream really loud!
+        rapumaXMLDefaults = os.path.join(self.rapumaHome, 'config', 'rapuma.xml')
+        if os.path.exists(rapumaXMLDefaults) :
+            self.tools.sysXmlConfig = self.tools.xml_to_section(rapumaXMLDefaults)
+        else :
+            raise IOError, "Can't open " + rapumaXMLDefaults
+
+        # Now make the users local rapuma.conf file if it isn't there
+        if not os.path.exists(self.userConfFile) :
+            self.initUserHome()
 
         # Load the system.conf file into an object
         self.userConfig = ConfigObj(self.userConfFile, encoding='utf-8')
