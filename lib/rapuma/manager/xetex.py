@@ -103,12 +103,16 @@ class Xetex (Manager) :
                 setattr(self, k, v)
 
         # Set some Booleans (this comes after persistant values are set)
+        # Setting hyphenation is a 2 step process, first check global, then group
+        self.useHyphenation         = False
+        if self.tools.str2bool(self.projectConfig['ProjectInfo']['hyphenationOn']) :
+            if self.tools.str2bool(self.projectConfig['Groups'][self.gid]['useHyphenation']) :
+                self.useHyphenation = True
+                
         # In case the macro is not installed we need to skip over this
         try :
-            self.useHyphenation         = self.tools.str2bool(self.projectConfig['ProjectInfo']['hyphenationOn'])
             self.chapNumOffSingChap     = self.tools.str2bool(self.macroConfig['Macros'][self.macPackId]['ChapterVerse']['omitChapterNumberOnSingleChapterBook'])
         except :
-            self.useHyphenation         = None
             self.chapNumOffSingChap     = None
         # Make any dependent folders if needed
         if not os.path.isdir(self.local.projGidFolder) :

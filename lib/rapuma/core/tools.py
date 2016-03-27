@@ -462,9 +462,12 @@ class Tools (object) :
     def getCidIdLine (self, fileName) :
         '''Return the entire \id line from an SFM file.'''
 
+#        import pdb; pdb.set_trace()
+        # This will find the ID even if it isn't on the first line
         if os.path.exists(fileName) :
-            with open(fileName, 'r') as f :
-              return f.readline()
+            for i, line in enumerate(open(fileName, 'r'), 1):
+                if '\\id ' in line:
+                    return line
 
 
     def discoverCIDFromFile (self, fileName) :
