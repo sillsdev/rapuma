@@ -62,8 +62,19 @@ os.environ['RAPUMA_BASE'] = rapumaHome
 # According to the base if found, insert the lib folder into the Python sys path
 if rapumaHome :
     sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
-# Set the user environment path. This is always in the same place.
-os.environ['RAPUMA_USER'] = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+# Set the user environment path. This is always in the same place
+# First figure out if this is a web or desktop installation
+desktop = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+server = os.path.join('/var', 'lib', 'rapuma', 'config')
+if os.path.isdir(desktop) :
+    os.environ['RAPUMA_USER'] = desktop
+elif os.path.isdir(server) :
+    os.environ['RAPUMA_USER'] = server
+else :
+    os.environ['RAPUMA_USER'] = ''
+
+# Old setup
+#os.environ['RAPUMA_USER'] = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 
 # Set the (potential) project home by looking for the project config file.
 def find_project_root(tag, path=os.path.curdir):

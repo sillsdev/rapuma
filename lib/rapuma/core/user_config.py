@@ -27,12 +27,16 @@ class UserConfig (object) :
     def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
-#        import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.defaultUserHome    = os.environ.get('RAPUMA_USER')
         self.userConfFileName   = 'rapuma.conf'
         self.tools              = Tools()
+
+
+# how do we express the next lines if the right RAPUMA_USER is present?
+
 
         # Point to the right user config
         # Look for a web installation first, if not go to default
@@ -44,6 +48,10 @@ class UserConfig (object) :
             self.userConfFile   = rapumaWebConfig
         else :
             self.userConfFile   = defaultConfig
+
+
+############################################################################3
+
 
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
