@@ -27,31 +27,17 @@ class UserConfig (object) :
     def __init__(self) :
         '''Intitate the whole class and create the object.'''
 
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
 
         self.rapumaHome         = os.environ.get('RAPUMA_BASE')
         self.defaultUserHome    = os.environ.get('RAPUMA_USER')
         self.userConfFileName   = 'rapuma.conf'
         self.tools              = Tools()
 
-
-# how do we express the next lines if the right RAPUMA_USER is present?
-
-
-        # Point to the right user config
-        # Look for a web installation first, if not go to default
-        # Note that a slash is put before var as it is off of root
-        # That kind of stops this from being cross-platform
-        rapumaWebConfig         = os.path.join('/var', 'lib', 'rapuma', 'config', self.userConfFileName)
-        defaultConfig           = os.path.join(self.defaultUserHome, self.userConfFileName)
-        if os.path.exists(rapumaWebConfig) :
-            self.userConfFile   = rapumaWebConfig
-        else :
-            self.userConfFile   = defaultConfig
-
-
-############################################################################3
-
+        # Point to the right user config either server or desktop
+        # The RAPUMA_USER setting should have the right path from
+        # the mother script (rapuma)
+        self.userConfFile       = os.path.join(self.defaultUserHome, self.userConfFileName)
 
         # Check to see if the file is there, then read it in and break it into
         # sections. If it fails, scream really loud!
@@ -62,7 +48,7 @@ class UserConfig (object) :
             raise IOError, "Can't open " + rapumaXMLDefaults
 
         # Now make the users local rapuma.conf file if it isn't there
-        if not os.path.exists(self.userConfFile) :
+        if not os.path.isfile(self.userConfFile) :
             self.initUserHome()
 
         # Load the system.conf file into an object
