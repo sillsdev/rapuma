@@ -32,8 +32,10 @@ for subdir in ('doc', 'resource', 'config', 'xetex-64') :
 # user indicates when passing the install command. It is expected that
 # when doing the install, the user will send either '--type server' or
 # '--type desktop', nothing more, nothing less.
-dtLocal = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
-srLocal = os.path.join('/var', 'lib', 'rapuma', 'config')
+dtConf      = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+dtProj      = os.path.expanduser(os.path.join('~', 'Publishing'))
+srConf      = os.path.join('/var', 'lib', 'rapuma', 'config')
+srProj      = os.path.join('/var', 'lib', 'rapuma', 'publishing')
 installType = 0
 if sys.argv[1] == 'install' :
     if '--type' in sys.argv :
@@ -46,16 +48,18 @@ if sys.argv[1] == 'install' :
     else :
         sys.exit('\nERROR: No system type was indicated (--type desktop|server). See installation documentation for more information. Process halted!\n')
 
-    # Now create the config folder in the right place
+    # Now create the config and the project folders in the right place
     # Set permissions so Rapuma can access the conf file
     os.umask(0000)
     if installType.lower() == 'server' :
-        if not os.path.exists(srLocal) :
-            os.makedirs(srLocal)
+        if not os.path.exists(srConf) :
+            os.makedirs(srConf)
+            os.makedirs(srProj)
     elif installType.lower() == 'desktop' :
-        if not os.path.exists(dtLocal) :
+        if not os.path.exists(dtConf) :
             # This needs to be for the local user (not root)
-            os.makedirs(dtLocal)
+            os.makedirs(dtConf)
+            os.makedirs(dtProj)
     else :
         sys.exit('\nERROR: Wrong type indicated, use either desktop or server as the --type. See installation documentation for more information. Process halted!\n')
 
