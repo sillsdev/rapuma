@@ -54,12 +54,14 @@ if sys.argv[1] == 'install' :
     if installType.lower() == 'server' :
         if not os.path.exists(srConf) :
             os.makedirs(srConf)
-            os.makedirs(srProj)
+            if not os.path.exists(srProj) :
+                os.makedirs(srProj)
     elif installType.lower() == 'desktop' :
         if not os.path.exists(dtConf) :
             # This needs to be for the local user (not root)
             os.makedirs(dtConf)
-            os.makedirs(dtProj)
+            if not os.path.exists(dtProj) :
+                os.makedirs(dtProj)
     else :
         sys.exit('\nERROR: Wrong type indicated, use either desktop or server as the --type. See installation documentation for more information. Process halted!\n')
 

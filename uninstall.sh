@@ -14,3 +14,8 @@ sudo rm -r /usr/local/lib/python2.7/dist-packages/rapuma
 cd /usr/local/lib/python2.7/dist-packages
 sudo find . -name "rapuma*" -exec rm -rfv {} \;
 
+# Finally we remove the user/system config file (both server and desktop)
+sudo rm -r ~/.config/rapuma
+sudo rm -r /var/lib/rapuma/config
+
+# What we don't do is remove the project folder
