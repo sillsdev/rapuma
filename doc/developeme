@@ -43,3 +43,5 @@ If you are doing Rapuma development work you might need this package:
     sudo apt-get install pyside-tools
 
 
+**** USEING ack-grep
+The ack-grep unitility is a very powerful tool that helps you find text strings in a folder and the folders in it. It is standard utility in most distro repos so be sure to install it and know how to use it.
