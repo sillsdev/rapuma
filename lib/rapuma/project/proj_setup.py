@@ -46,7 +46,8 @@ class ProjSetup (object) :
         self.gid                            = gid
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+#        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+        self.projHome                       = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), self.pid)
         self.tools                          = Tools()
         self.log                            = ProjLog(self.pid)
         self.systemVersion                  = sysConfig['Rapuma']['systemVersion']
@@ -590,7 +591,8 @@ class ProjSetup (object) :
 
 #        import pdb; pdb.set_trace()
 
-        projHome = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+#        projHome = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+        projHome = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), self.pid)
         result = False
         if not os.path.exists(projHome) :
             result = True
@@ -1253,7 +1255,8 @@ class ProjDelete (object) :
     def deleteProject (self, pid) :
         '''Delete a project.'''
 
-        projHome                            = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), pid)
+#        projHome                            = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), pid)
+        projHome                            = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), pid)
 
         # Delete project
         if os.path.exists(projHome) :

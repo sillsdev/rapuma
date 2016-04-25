@@ -40,7 +40,8 @@ class ProjComponent (object) :
         self.tools                      = Tools()
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-        self.projHome                   = os.path.join(self.userConfig['System']['projects'], self.pid)
+#        self.projHome                   = os.path.join(self.userConfig['System']['projects'], self.pid)
+        self.projHome                   = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         self.local                      = ProjLocal(pid)
         self.projectConfig              = Config(self.local).projectConfig
         self.log                        = ProjLog(pid)

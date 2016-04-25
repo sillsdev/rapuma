@@ -34,8 +34,8 @@ for subdir in ('doc', 'resource', 'config', 'xetex-64') :
 # '--type desktop', nothing more, nothing less.
 dtConf      = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 dtProj      = os.path.expanduser(os.path.join('~', 'Publishing'))
-srConf      = os.path.join('/var', 'lib', 'rapuma', 'config')
-srProj      = os.path.join('/var', 'lib', 'rapuma', 'publishing')
+srConf      = os.path.join('/var', 'www', 'rapuma', 'config')
+srProj      = os.path.join('/var', 'www', 'rapuma', 'publishing')
 installType = 0
 if sys.argv[1] == 'install' :
     if '--type' in sys.argv :

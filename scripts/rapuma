@@ -67,8 +67,8 @@ if rapumaHome :
 # First figure out if this is a web or desktop installation
 desktopConf     = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
 desktopProj     = os.path.expanduser(os.path.join('~', 'Publishing'))
-serverConf      = os.path.join('/var', 'lib', 'rapuma', 'config')
-serverProj      = os.path.join('/var', 'lib', 'rapuma', 'publishing')
+serverConf      = os.path.join('/var', 'www', 'rapuma', 'config')
+serverProj      = os.path.join('/var', 'www', 'rapuma', 'publishing')
 if os.path.isdir(desktopConf) :
     os.environ['RAPUMA_USER'] = desktopConf
     os.environ['RAPUMA_PROJECTS'] = desktopProj
@@ -139,7 +139,6 @@ uc                                      = UserConfig()
 tools                                   = Tools()
 
 # Get a list of projects
-#projDir = os.path.expanduser(uc.userConfig['System']['projects'])
 projDir = os.path.expanduser(os.environ['RAPUMA_PROJECTS'])
 if projDir and os.path.exists(projDir) :
     projList = tools.getProjIdList(projDir)

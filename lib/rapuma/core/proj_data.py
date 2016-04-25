@@ -40,8 +40,10 @@ class ProjData (object) :
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
-        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
-        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['System']['projects']))
+#        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+        self.projHome       = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), self.pid)
+#        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['System']['projects']))
+        self.projList       = self.tools.getProjIdList(self.projHome)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -648,7 +650,8 @@ class ProjData (object) :
         elif self.local.projHome :
             return self.local.projHome
         else :
-            return self.tools.resolvePath(os.path.join(self.userConfig['System']['projects'], self.pid))
+#            return self.tools.resolvePath(os.path.join(self.userConfig['System']['projects'], self.pid))
+            return self.tools.resolvePath(os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid))
 
 
 

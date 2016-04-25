@@ -62,7 +62,8 @@ class ProjEdit (object) :
 
         # Look for an existing project home path
         if self.tools.isProject(self.pid) :
-            localProjHome   = os.path.join(self.userConfig['System']['projects'], self.pid)
+#            localProjHome   = os.path.join(self.userConfig['System']['projects'], self.pid)
+            localProjHome   = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         else :
             localProjHome   = ''
         # Testing: The local project home wins over a user provided one

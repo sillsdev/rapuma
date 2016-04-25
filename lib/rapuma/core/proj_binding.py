@@ -50,7 +50,8 @@ class ProjBinding (object) :
         self.layoutConfig       = self.config.layoutConfig
         self.useBackground      = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useBackground'])
         self.useDocInfo         = self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useDocInfo'])
-        self.projHome           = os.path.join(self.userConfig['System']['projects'], self.pid)
+#        self.projHome           = os.path.join(self.userConfig['System']['projects'], self.pid)
+        self.projHome           = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         self.local              = ProjLocal(self.pid)
         self.log                = ProjLog(self.pid)
         self.pdfViewerCmd       = self.tools.getPdfViewerCommand(self.userConfig, self.projectConfig)

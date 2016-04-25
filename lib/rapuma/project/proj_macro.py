@@ -43,7 +43,8 @@ class Macro (object) :
         self.cType                          = cType
         self.user                           = UserConfig()
         self.userConfig                     = self.user.userConfig
-        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+#        self.projHome                       = os.path.join(os.path.expanduser(self.userConfig['System']['projects']), self.pid)
+        self.projHome                       = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), self.pid)
         self.local                          = ProjLocal(pid, gid, cType)
 
 
