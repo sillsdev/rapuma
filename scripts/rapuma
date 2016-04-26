@@ -138,8 +138,19 @@ sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'co
 uc                                      = UserConfig()
 tools                                   = Tools()
 
-# Get a list of projects
+# Adjust the project folder path. Here we look for an alternate
+# path if one has been put into the user config.
+# First set the path to the default
 projDir = os.path.expanduser(os.environ['RAPUMA_PROJECTS'])
+# Now look for an alternate path
+altDir = os.path.expanduser(uc.userConfig['System']['projects'])
+if altDir :
+    if os.path.exists(altDir) :
+        projDir = altDir
+    else :
+        sys.exit('\nERROR: An alternate project path was set but does not seem valid: ' + altDir + '\nPlease check the path set for [projects] in the Rapuma user config file. \nProcess halting.\n')
+
+# Get a list of projects
 if projDir and os.path.exists(projDir) :
     projList = tools.getProjIdList(projDir)
 else :

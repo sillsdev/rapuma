@@ -117,14 +117,14 @@ Todo:
             <key>projects</key>
             <description>The full path to where projects are kept. The default is set for deployment on a Debian server. Adjust for other environments.</description>
             <type>string</type>
-            <value>~/Publishing</value>
+            <value></value>
         </setting>
         <setting>
             <name>Path To Cloud Portal</name>
             <key>cloud</key>
             <description>The full path to the local cloud portal. This would be a folder that is linked to a file share system and allows project data to be backed up off-site.</description>
             <type>string</type>
-            <value>~/Dropbox/Publishing</value>
+            <value></value>
         </setting>
 
     </section>
