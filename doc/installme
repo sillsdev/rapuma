@@ -99,7 +99,7 @@ Like the palaso.python setup you will use the setup.py script. In your terminal,
     cd ~/Projects/rapuma
     ./setup.py build
     
-There is one more command to run but an extra parameter has been added from the default install command. Rapuma needs to know if it will be run in a standard desktop environment or on a server. For this, the --type parameter is used, followed by either "desktop" or "server". In the example here we are installing it on a desktop system.
+The next command to run has an additional parameter. Rapuma needs to know if it will be run in a standard desktop environment or on a server. For this, the --type parameter is used, followed by either "desktop" or "server". In the example here we are installing it on a desktop system.
 
     sudo ./setup.py install --type desktop
 

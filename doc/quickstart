@@ -1,7 +1,7 @@
 RAPUMA QUICK START GUIDE
 -----------------------------------------
 	By Dennis Drescher (dennis.drescher.86@gmail.com)
-	Last edited: 29 January 2016
+	Last edited: 28 April 2016
 -----------------------------------------
 
 This will help you setup a new Rapuma installation and show you a couple, hopefully useful, exercises.
@@ -17,9 +17,16 @@ Set your user ID (no spaces) with...
 
     rapuma setting system rapuma --section System --key userID --value "<Whatever your ID is>"
 
-Set the default path to your publishing projects folder (change path as necessary):
+Rapuma needs to keep its projects in one location. The default path to your publishing projects folder is either ~/Publishing, if it is a desktop installation, or /var/www/rapuma/publishing, if it is being run on a server. It is possible to suply an alternate path for Rapuma to use. The following commands would be examples:
 
-    rapuma setting system rapuma --section System --key projects --value "~/Publishing"
+    rapuma setting system rapuma --section System --key projects --value "~/Documents/Pub"
+    
+    or something like...
+    
+    rapuma setting system rapuma --section System --key projects --value "/var/www/mypubs"
+    
+With this set, Rapuma will use the alternate location to create and store projects. If this is not set, Rapuma will use the default location for the type of environment it is being used in. It is recomended that alternate locations not be used as permission problems can be encountered.  
+    
 
 Set the path to the "Cloud" (Internet storage like Dropbox):
 
