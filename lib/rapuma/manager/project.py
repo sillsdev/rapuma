@@ -41,7 +41,6 @@ class Project (object) :
         self.gid                    = gid
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-#        self.projHome               = os.path.join(self.userConfig['System']['projects'], self.pid)
         self.projHome               = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         self.config                 = Config(self.pid)
         self.config.getProjectConfig()

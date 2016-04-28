@@ -142,11 +142,12 @@ tools                                   = Tools()
 # path if one has been put into the user config.
 # First set the path to the default
 projDir = os.path.expanduser(os.environ['RAPUMA_PROJECTS'])
-# Now look for an alternate path
+# Now look for an alternate path and set it if it is valid
 altDir = os.path.expanduser(uc.userConfig['System']['projects'])
 if altDir :
     if os.path.exists(altDir) :
         projDir = altDir
+        os.environ['RAPUMA_PROJECTS'] = altDir
     else :
         sys.exit('\nERROR: An alternate project path was set but does not seem valid: ' + altDir + '\nPlease check the path set for [projects] in the Rapuma user config file. \nProcess halting.\n')
 
@@ -394,7 +395,7 @@ def userArguments (args) :
             if sub == 'create' :
                 ProjSetup(sysConfig, args.project_id).newProject(mediaType)
             elif sub == 'remove' :
-                    ProjDelete().deleteProject(args.project_id)
+                ProjDelete().deleteProject(args.project_id)
             else :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
         # Push or pull a project to or from the cloud

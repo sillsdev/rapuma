@@ -46,7 +46,6 @@ class ProjBackground (object) :
         self.log                        = ProjLog(pid)
         self.user                       = UserConfig()
         self.userConfig                 = self.user.userConfig
-#        self.projHome                   = os.path.join(self.userConfig['System']['projects'], self.pid)
         self.projHome                   = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         self.mmToPx                     = 72 / 25.4
         # For debugging purposes a switch can be set here for verbose

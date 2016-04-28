@@ -113,9 +113,9 @@ Todo:
             <value>5</value>
         </setting>
         <setting>
-            <name>Default Projects Path</name>
+            <name>Alternate Projects Path</name>
             <key>projects</key>
-            <description>The full path to where projects are kept. The default is set for deployment on a Debian server. Adjust for other environments.</description>
+            <description>The full alternate path to where projects are kept. This allows the user to specify a path other than the default project path which is [~/Publishing] on a desktop environment and [/var/www/rapuma/publishing] in a server environment. Note, Rapuma will fail if this is not a valid existing path.</description>
             <type>string</type>
             <value></value>
         </setting>
