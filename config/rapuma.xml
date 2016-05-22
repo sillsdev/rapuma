@@ -89,7 +89,7 @@ Todo:
             <key>pdfViewerCommand</key>
             <description>The default command needed to view PDF documents produced by the system. This can be changed at the component manager level.</description>
             <type>list</type>
-            <value>evince,</value>
+            <value>evince</value>
         </setting>
         <setting>
             <name>PDF Utility Command</name>

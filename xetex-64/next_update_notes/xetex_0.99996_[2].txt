@@ -1,0 +1,53 @@
+This is a message from Bobby de Vos about a new version of XeTeX:
+
+Greetings,
+
+NRSI is working on a font called Awami [1] to handle Nastaliq style text. To fully support this font, a new parameter called \XeTeXinterwordspaceshaping has been added to XeTeX in version 0.99996 [2]. This parameter needs to be set for full support of Awami. The following text (which will ship with the Paratext Print Draft functionality) has more details.
+
+% Control how cross-space contextualization is handled.
+
+% No cross-space contextualization.
+% This is how XeTeX behaves by default.
+% Most projects will use this setting.
+%\XeTeXinterwordspaceshaping = 0
+
+% Some cross-space contextualization.
+% Spaces between words are adjusted,
+% but the rendering of individual words is not affected by the spaces.
+%\XeTeXinterwordspaceshaping = 1
+
+% Full cross-space contextualization.
+% Spaces between words are adjusted,
+% and the rendering of individual words is affected by the spaces.
+%\XeTeXinterwordspaceshaping = 2
+
+Place this text into your .tex file and uncomment the level you need.
+
+[1]
+http://scripts.sil.org/Awami_alpha1
+
+[2]
+Available with TeX Live 2016 pre-test releases. XeTeX from this source comes with Graphite version 1.3.8 which supports Awami.
+
+-- 
+Bobby de Vos
+bobby_devos@sil.org
+
+##### In a later note he wrote:
+
+On 05/17/2016 09:22 AM, Bobby de Vos wrote:
+Dennis,
+
+The situation with Paratext varies depending on the platform
+
+    Paratex on Windows has its own copy of xetex.
+    Paratext on Linux uses xetex as packaged by Ubuntu
+
+You can get the source code for XeTeX from https://sourceforge.net/p/xetex/code/ci/master/tree/ and then compile a new binary
+
+Or it might work to get the needed binaries from TeX Live 2016 pre-test from https://www.tug.org/texlive/pretest.html
+
+I am not saying you have to upgrade Rapuma, I am not your boss after all. Just pointing out changes in the world that might affect you.
+
+Bobby
+
