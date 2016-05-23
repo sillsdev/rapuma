@@ -40,8 +40,8 @@ class ProjData (object) :
         self.userConfig     = self.user.userConfig
         self.local          = ProjLocal(pid)
         self.log            = ProjLog(pid)
-        self.projHome       = os.path.join(os.path.expanduser(self.userConfig['Resources']['projects']), self.pid)
-        self.projList       = self.tools.getProjIdList(os.path.expanduser(self.userConfig['Resources']['projects']))
+        self.projHome       = os.path.join(os.path.expanduser(os.environ['RAPUMA_PROJECTS']), self.pid)
+        self.projList       = self.tools.getProjIdList(self.projHome)
 
         # Log messages for this module
         self.errorCodes     = {
@@ -116,53 +116,53 @@ class ProjData (object) :
         return excludeFiles
 
 # FIXME: Should archiveProject() use self.pid instead of explicitly passing in a pid?
-    def archiveProject (self, pid, path = None) :
-        '''Archive a project. Send the compressed archive file to the user-specified
-        archive folder. If none is specified, put the archive in cwd. If a valid
-        path is specified, send it to that location. Like backup, this too will
-        overwrite any existing file of the same name. The difference is that this
-        will also disable the project so it cannot be accesses by Rapuma. When a
-        project is archived, all work should cease on the project.'''
+    #def archiveProject (self, pid, path = None) :
+        #'''Archive a project. Send the compressed archive file to the user-specified
+        #archive folder. If none is specified, put the archive in cwd. If a valid
+        #path is specified, send it to that location. Like backup, this too will
+        #overwrite any existing file of the same name. The difference is that this
+        #will also disable the project so it cannot be accesses by Rapuma. When a
+        #project is archived, all work should cease on the project.'''
 
-        # Make a private project object just for archiving
-        aProject = Project(pid, self.gid)
-        # Set some paths and file names
-        archName = aProject.projectIDCode + '.rapuma'
-        userArchives = self.userConfig['Resources']['archive']
-        archTarget = ''
-        if path :
-            path = self.tools.resolvePath(path)
-            if os.path.isdir(path) :
-                archTarget = os.path.join(path, archName)
-            else :
-                self.tools.terminal('\nError: The path given is not valid: [' + path + ']\n')
-                self.tools.dieNow()
-        elif os.path.isdir(userArchives) :
-            archTarget = os.path.join(userArchives, archName)
-        elif os.path.isdir(os.path.dirname(aProject.local.projHome)) :
-            # Default to the dir just above the project
-            archTarget = os.path.dirname(aProject.local.projHome)
-        else :
-            self.tools.terminal('\nError: Cannot resolve a path to create the archive file!\n')
-            self.tools.dieNow()
+        ## Make a private project object just for archiving
+        #aProject = Project(pid, self.gid)
+        ## Set some paths and file names
+        #archName = aProject.projectIDCode + '.rapuma'
+        #userArchives = self.userConfig['Resources']['archive']
+        #archTarget = ''
+        #if path :
+            #path = self.tools.resolvePath(path)
+            #if os.path.isdir(path) :
+                #archTarget = os.path.join(path, archName)
+            #else :
+                #self.tools.terminal('\nError: The path given is not valid: [' + path + ']\n')
+                #self.tools.dieNow()
+        #elif os.path.isdir(userArchives) :
+            #archTarget = os.path.join(userArchives, archName)
+        #elif os.path.isdir(os.path.dirname(aProject.local.projHome)) :
+            ## Default to the dir just above the project
+            #archTarget = os.path.dirname(aProject.local.projHome)
+        #else :
+            #self.tools.terminal('\nError: Cannot resolve a path to create the archive file!\n')
+            #self.tools.dieNow()
 
-        # Get a list of files we don't want
-        excludeFiles = self.makeExcludeFileList(source)
+        ## Get a list of files we don't want
+        #excludeFiles = self.makeExcludeFileList(source)
 
-        self.zipUpProject(archTarget, excludeFiles)
+        #self.zipUpProject(archTarget, excludeFiles)
 
-        # Rename the source dir to indicate it was archived
-        bakArchProjDir = aProject.local.projHome + '(archived)'
-        if os.path.isdir(bakArchProjDir) :
-            self.tools.terminal('\nError: Cannot complete archival process!\n')
-            self.tools.terminal('\nAnother archived version of this project exsits with the folder name of: ' + self.tools.fName(bakArchProjDir) + '\n')
-            self.tools.terminal('\nPlease remove or rename it and then repete the process.\n')
-            self.tools.dieNow()
-        else :
-            os.rename(aProject.local.projHome, bakArchProjDir)
+        ## Rename the source dir to indicate it was archived
+        #bakArchProjDir = aProject.local.projHome + '(archived)'
+        #if os.path.isdir(bakArchProjDir) :
+            #self.tools.terminal('\nError: Cannot complete archival process!\n')
+            #self.tools.terminal('\nAnother archived version of this project exsits with the folder name of: ' + self.tools.fName(bakArchProjDir) + '\n')
+            #self.tools.terminal('\nPlease remove or rename it and then repete the process.\n')
+            #self.tools.dieNow()
+        #else :
+            #os.rename(aProject.local.projHome, bakArchProjDir)
 
-        # Finish here
-        self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
+        ## Finish here
+        #self.tools.terminal('Archive for [' + pid + '] created and saved to: ' + archTarget + '\n')
 
 
     def zipUpProject (self, target, excludeFiles = None) :
@@ -198,63 +198,63 @@ class ProjData (object) :
             print '\n'
 
 # FIXME: Should restoreArchive() use self.pid instead of explicitly passing in a pid?
-    def restoreArchive (self, pid, targetPath, sourcePath = None) :
-        '''Restore a project from the user specified storage area or sourcePath if 
-        specified. Use targetPath to specify where the project will be restored.
-        Rapuma will register the project there.'''
+    #def restoreArchive (self, pid, targetPath, sourcePath = None) :
+        #'''Restore a project from the user specified storage area or sourcePath if 
+        #specified. Use targetPath to specify where the project will be restored.
+        #Rapuma will register the project there.'''
 
-        # Check to see if the user included the extension
-        try :
-            pid.split('.')[1] == 'rapuma'
-            archName = pid
-            pid = pid.split('.')[0]
-        except :
-            archName = pid + '.rapuma'
+        ## Check to see if the user included the extension
+        #try :
+            #pid.split('.')[1] == 'rapuma'
+            #archName = pid
+            #pid = pid.split('.')[0]
+        #except :
+            #archName = pid + '.rapuma'
 
-        archSource = ''
-        archTarget = ''
-        userArchives = ''
+        #archSource = ''
+        #archTarget = ''
+        #userArchives = ''
 
-        # First look for the archive that is to be restored
-        if sourcePath :
-            if os.path.isdir(sourcePath) :
-                archSource = os.path.join(sourcePath, archName)
-        elif os.path.isdir(self.userConfig['Resources']['archive']) :
-            userArchives = self.userConfig['Resources']['archive']
-            archSource = os.path.join(userArchives, archName)
-        else :
-            self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
-            self.tools.dieNow()
+        ## First look for the archive that is to be restored
+        #if sourcePath :
+            #if os.path.isdir(sourcePath) :
+                #archSource = os.path.join(sourcePath, archName)
+        #elif os.path.isdir(self.userConfig['Resources']['archive']) :
+            #userArchives = self.userConfig['Resources']['archive']
+            #archSource = os.path.join(userArchives, archName)
+        #else :
+            #self.tools.terminal('\nError: The path (or name) given is not valid: [' + archSource + ']\n')
+            #self.tools.dieNow()
 
-        # Now set the target params
-        if targetPath :
-            if not os.path.isdir(targetPath) :
-                self.tools.terminal('\nError: The path given is not valid: [' + targetPath + ']\n')
-                self.tools.dieNow()
-            else :
-                archTarget = os.path.join(targetPath, pid)
+        ## Now set the target params
+        #if targetPath :
+            #if not os.path.isdir(targetPath) :
+                #self.tools.terminal('\nError: The path given is not valid: [' + targetPath + ']\n')
+                #self.tools.dieNow()
+            #else :
+                #archTarget = os.path.join(targetPath, pid)
 
-        # If we made it this far, extract the archive
-        with zipfile.ZipFile(archSource, 'r') as myzip :
-            myzip.extractall(archTarget)
+        ## If we made it this far, extract the archive
+        #with zipfile.ZipFile(archSource, 'r') as myzip :
+            #myzip.extractall(archTarget)
 
-        # Permission for executables is lost in the zip, fix it here
-        for folder in ['Scripts', os.path.join('Macros', 'User')] :
-            self.tools.fixExecutables(os.path.join(archTarget, folder))
+        ## Permission for executables is lost in the zip, fix it here
+        #for folder in ['Scripts', os.path.join('Macros', 'User')] :
+            #self.tools.fixExecutables(os.path.join(archTarget, folder))
 
-# FIXME: This will need some work 
+## FIXME: This will need some work 
 
-        # Add project to local Rapuma project registry
-        # To do this we need to open up the restored project config file
-        # and pull out some settings.
-        local       = ProjLocal(pid)
-        pc          = Config(pid)
-        log         = ProjLog(pid)
-        aProject    = Project(pid, self.gid)
-    #    import pdb; pdb.set_trace()
+        ## Add project to local Rapuma project registry
+        ## To do this we need to open up the restored project config file
+        ## and pull out some settings.
+        #local       = ProjLocal(pid)
+        #pc          = Config(pid)
+        #log         = ProjLog(pid)
+        #aProject    = Project(pid, self.gid)
+    ##    import pdb; pdb.set_trace()
 
-        # Finish here
-        self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
+        ## Finish here
+        #self.tools.terminal('\nRapuma archive [' + pid + '] has been restored to: ' + archTarget + '\n')
 
 
 ###############################################################################
@@ -648,7 +648,7 @@ class ProjData (object) :
         elif self.local.projHome :
             return self.local.projHome
         else :
-            return self.tools.resolvePath(os.path.join(self.userConfig['Resources']['projects'], self.pid))
+            return self.tools.resolvePath(os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid))
 
 
 

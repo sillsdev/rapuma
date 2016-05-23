@@ -41,7 +41,7 @@ class Project (object) :
         self.gid                    = gid
         self.user                   = UserConfig()
         self.userConfig             = self.user.userConfig
-        self.projHome               = os.path.join(self.userConfig['Resources']['projects'], self.pid)
+        self.projHome               = os.path.join(os.environ['RAPUMA_PROJECTS'], self.pid)
         self.config                 = Config(self.pid)
         self.config.getProjectConfig()
         self.projectConfig          = self.config.projectConfig
@@ -56,6 +56,9 @@ class Project (object) :
         self.projectMediaIDCode     = self.projectConfig['ProjectInfo']['projectMediaIDCode']
         self.projectIDCode          = self.projectConfig['ProjectInfo']['projectIDCode']
         self.projectName            = self.projectConfig['ProjectInfo']['projectTitle']
+        self.plid                   = self.projectConfig['ProjectInfo']['languageCode']
+        self.psid                   = self.projectConfig['ProjectInfo']['scriptCode']
+        
         # The gid cannot generally be set yet but we will make a placeholder
         # for it here and the functions below will set it. (I'm just say'n)
 

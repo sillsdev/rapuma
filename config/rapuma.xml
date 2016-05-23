@@ -89,7 +89,7 @@ Todo:
             <key>pdfViewerCommand</key>
             <description>The default command needed to view PDF documents produced by the system. This can be changed at the component manager level.</description>
             <type>list</type>
-            <value>evince,-w</value>
+            <value>evince</value>
         </setting>
         <setting>
             <name>PDF Utility Command</name>
@@ -113,11 +113,18 @@ Todo:
             <value>5</value>
         </setting>
         <setting>
-            <name>Default Projects Path</name>
+            <name>Alternate Projects Path</name>
             <key>projects</key>
-            <description>The full path to where projects are kept. The default is set for deployment on a Debian server. Adjust for other environments.</description>
+            <description>The full alternate path to where projects are kept. This allows the user to specify a path other than the default project path which is [~/Publishing] on a desktop environment and [/var/www/rapuma/publishing] in a server environment. Note, Rapuma will fail if this is not a valid existing path.</description>
             <type>string</type>
-            <value>/var/lib/rapuma/Publishing</value>
+            <value></value>
+        </setting>
+        <setting>
+            <name>Path To Cloud Portal</name>
+            <key>cloud</key>
+            <description>The full path to the local cloud portal. This would be a folder that is linked to a file share system and allows project data to be backed up off-site.</description>
+            <type>string</type>
+            <value></value>
         </setting>
 
     </section>

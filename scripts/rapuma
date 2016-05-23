@@ -62,8 +62,23 @@ os.environ['RAPUMA_BASE'] = rapumaHome
 # According to the base if found, insert the lib folder into the Python sys path
 if rapumaHome :
     sys.path.insert(0, os.path.join(rapumaHome, 'lib'))
-# Set the user environment path. This is always in the same place.
-os.environ['RAPUMA_USER'] = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+
+# Set the user environment path. This is always in the same place
+# First figure out if this is a web or desktop installation
+desktopConf     = os.path.expanduser(os.path.join('~', '.config', 'rapuma'))
+desktopProj     = os.path.expanduser(os.path.join('~', 'Publishing'))
+serverConf      = os.path.join('/var', 'www', 'rapuma', 'config')
+serverProj      = os.path.join('/var', 'www', 'rapuma', 'publishing')
+if os.path.isdir(desktopConf) :
+    os.environ['RAPUMA_USER'] = desktopConf
+    os.environ['RAPUMA_PROJECTS'] = desktopProj
+    installType = 'desktop'
+elif os.path.isdir(serverConf) :
+    os.environ['RAPUMA_USER'] = serverConf
+    os.environ['RAPUMA_PROJECTS'] = serverProj
+    installType = 'server'
+else :
+    sys.exit('\nERROR: No user configuration folder found. Rapuma setup is not complete. Please see installation documentation for more information.\n')
 
 # Set the (potential) project home by looking for the project config file.
 def find_project_root(tag, path=os.path.curdir):
@@ -106,6 +121,7 @@ from rapuma.project.proj_setup          import ProjSetup, ProjDelete
 from rapuma.project.proj_commander      import ProjCommander
 from rapuma.project.proj_font           import ProjFont
 from rapuma.project.proj_background     import ProjBackground
+from rapuma.project.proj_hyphenation    import ProjHyphenation
 from rapuma.project.proj_illustration   import ProjIllustration
 from rapuma.project.proj_script         import ProjScript
 from rapuma.project.proj_diagnose       import ProjDiagnose
@@ -122,12 +138,26 @@ sysConfig                               = ConfigObj(os.path.join(rapumaHome, 'co
 uc                                      = UserConfig()
 tools                                   = Tools()
 
+# Adjust the project folder path. Here we look for an alternate
+# path if one has been put into the user config.
+# First set the path to the default
+projDir = os.path.expanduser(os.environ['RAPUMA_PROJECTS'])
+# Now look for an alternate path and set it if it is valid
+altDir = os.path.expanduser(uc.userConfig['System']['projects'])
+if altDir :
+    if os.path.exists(altDir) :
+        projDir = altDir
+        os.environ['RAPUMA_PROJECTS'] = altDir
+    else :
+        sys.exit('\nERROR: An alternate project path was set but does not seem valid: ' + altDir + '\nPlease check the path set for [projects] in the Rapuma user config file. \nProcess halting.\n')
+
 # Get a list of projects
-projDir = os.path.expanduser(uc.userConfig['Resources']['projects'])
-if os.path.exists(projDir) :
+if projDir and os.path.exists(projDir) :
     projList = tools.getProjIdList(projDir)
 else :
-    sys.exit('\nERROR: The projects folder path is not valid: ' + projDir + '. Process halting.\n')
+    if not projDir :
+        projDir = '<null>'
+    sys.exit('\nERROR: The projects folder path is missing or not valid: ' + projDir + '\nIt maybe necessary to change the configuration and reinstall Rapuma. \nProcess halting.\n')
 
 # Set some global vars
 systemName                              = sysConfig['Rapuma']['systemName']
@@ -142,7 +172,7 @@ local                                   = None
 
 # Give a welcome message
 tools.terminal('\n\t\tWelcome to ' + systemName)
-tools.terminal('\n\t\t\tVersion ' + systemVersion + '\n')
+tools.terminal('\n\t\t\tVersion ' + systemVersion + ' - (' + installType + ')\n')
 
 ###############################################################################
 ########################### Rapuma CLI Functions ##############################
@@ -365,7 +395,7 @@ def userArguments (args) :
             if sub == 'create' :
                 ProjSetup(sysConfig, args.project_id).newProject(mediaType)
             elif sub == 'remove' :
-                    ProjDelete().deleteProject(args.project_id)
+                ProjDelete().deleteProject(args.project_id)
             else :
                 sys.exit('\nERROR: Sorry, the ' + sub + ' command is not supported in the ' + cmd + ' context. Process halting.\n')
         # Push or pull a project to or from the cloud
@@ -512,7 +542,7 @@ def userArguments (args) :
         source      = ''
         cType       = ''
         # Check GID
-        if cmd != 'font' and cmd != 'macro' :
+        if cmd != 'font' and cmd != 'macro' and cmd != 'hyphenation' :
             if not ProjSetup(sysConfig, pid).isGroup(gid) :
                 sys.exit('\nERROR: Group ID is not valid: [' + gid + '] Process halting.\n')
         # Path set and test for existance of file or folder
@@ -547,6 +577,13 @@ def userArguments (args) :
             # Update a font in the project
             elif sub == 'update' :
                 ProjFont(pid).updateFontPack(path, cType)
+        elif cmd == 'hyphenation' :
+            if sub == 'add' :
+                ProjHyphenation(pid).addHyphenationFiles(path)
+            elif sub == 'remove' :
+                ProjHyphenation(pid).removeHyphenationFiles()
+            elif sub == 'update' :
+                ProjHyphenation(pid).updateHyphenationFiles(path)
         elif cmd == 'illustration' :
             if sub == 'add' :
                 ProjIllustration(pid, gid).addIllustrationFiles(path)
@@ -603,7 +640,6 @@ def userArguments (args) :
         background  = args.background
         diagnostic  = args.diagnostic
         docInfo     = args.doc_info
-        hyphenation = args.hyphenation
         save        = args.save
         pages       = args.pages
         override    = args.override
@@ -653,17 +689,12 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     # First we will set whatever peripheral features to what
                     # they need to be. After we will turn them off.
-                    # Hyphenation can be run in any case
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
                     # Now we will render
                     Project(pid, gid).renderGroup(cidList, pages, override, save)
                     # Just to be safe we will just turn everything off
                     resetOutputBackgroundFeatures(pid)
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
@@ -691,17 +722,12 @@ def userArguments (args) :
                 if cType == 'usfm' :
                     # First we will set whatever peripheral features to what
                     # they need to be. After we will turn them off.
-                    # Hyphenation can be run in any case
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'True')
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, diagnostic, docInfo)
                     # Now we will render
                     Project(pid, gid).renderGroup(None, pages, override, save)
                     # Just to be safe we will just turn everything off
                     resetOutputBackgroundFeatures(pid)
-                    if hyphenation :
-                        ProjSetup(sysConfig, pid).changeConfigSetting('project', 'Groups/' + gid, 'useHyphenation', 'False')
                 elif cType == 'pdf' :
                     # Set the background features
                     setupOutputBackgroundFeatures(pid, background, None, docInfo)
@@ -831,7 +857,7 @@ if __name__ == '__main__' :
     ctCompType         = ['usfm', 'pdf']
     flType             = ['backup', 'source']
     # Asset
-    asCmd              = ['background', 'font', 'illustration', 'macro', 'script']
+    asCmd              = ['background', 'font', 'hyphenation', 'illustration', 'macro', 'script']
     asSubCmd           = ['add', 'remove', 'update']
     # Processes
     pcCmd              = ['component', 'group', 'project']
@@ -886,7 +912,6 @@ if __name__ == '__main__' :
     processCommand.add_argument('-b', '--background', action='store_true', help='Used only with the render command, this will add a background to the rendered group.')
     processCommand.add_argument('-n', '--doc_info', action='store_true', help='Used only with background when the render command is run, this will add a document information to the background layer for the rendered group.')
     processCommand.add_argument('-d', '--diagnostic', action='store_true', help='Used only with the render command, this will add a diagnostic layer to the rendered group.')
-    processCommand.add_argument('-y', '--hyphenation', action='store_true', help='Use hyphenation for the group to be rendered.')
     processCommand.add_argument('-i', '--cid_list', help='Using the proper ID, specify components to be added to this group. A group can have one or more components. The list must be enclosed by quotes and have only a space between ID codes, e.g. \"aaa bbb ccc\".')
     processCommand.add_argument('-s', '--save', action='store_true', help='Save a rendered file to the Deliverable folder with a unique name.')
     processCommand.add_argument('-a', '--pages', help='Specify a page number or range of pages to render.')

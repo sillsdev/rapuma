@@ -39,9 +39,9 @@ class ProjProcess (object) :
         if projectConfig :
             self.projectConfig      = projectConfig
         else :
-            self.proj_config            = Config(self.pid)
+            self.proj_config        = Config(self.pid)
             self.proj_config.getProjectConfig()
-            self.projectConfig          = self.proj_config.projectConfig
+            self.projectConfig      = self.proj_config.projectConfig
         self.local                  = ProjLocal(pid, gid, self.projectConfig)
         self.log                    = ProjLog(pid)
 

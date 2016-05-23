@@ -16,6 +16,8 @@ SYSTEM SETUP
 Go to the SIL Linux packages site and hook your system up with that if it isn't already. Follow the instructions on this page:
 
     http://packages.sil.org
+    
+(Note, however, that the above instructions may not be necessary if you are running the WASTA Linux package.)
 
 Now run the following commands in your terminal:
 
@@ -92,11 +94,14 @@ This will create a folder named rapuma in the Projects folder. The master branch
 4) PACKAGE INSTALLATION AND SETUP
 -------------------------------------------------------------------------------
 
-Like the palaso.python setup you will use the setup.py script. With a terminal in the root of the rapuma repository on your local machine, run:
+Like the palaso.python setup you will use the setup.py script. In your terminal, in the rapuma folder, run these commands:
 
     cd ~/Projects/rapuma
     ./setup.py build
-    sudo ./setup.py install
+    
+The next command to run has an additional parameter. Rapuma needs to know if it will be run in a standard desktop environment or on a server. For this, the --type parameter is used, followed by either "desktop" or "server". In the example here we are installing it on a desktop system.
+
+    sudo ./setup.py install --type desktop
 
 To test the instalation, type:
 

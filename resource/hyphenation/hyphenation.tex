@@ -1,0 +1,40 @@
+% File: hyphenation.tex
+
+% The data in this file is for the purpose of driving the hyphenation
+% process in this project. Comments are made below to guide in the
+% adding or changing data. Please refer to the documentation for more
+% details on how to make changes or how the process works.
+
+% The following are hyphenation settings that will be used for this
+% publishing project. More settings can be added here as well. For more
+% information about what settings may enhance hyphenation for this
+% project, look in "The TeXbook", by Donald E. Knuth where you will
+% find much more on the subject.
+
+% Define a language
+\newlanguage\<ISO Code>language
+
+% Set the language for this project to the one you just defined
+\language = \<ISO Code>language
+
+% Define the hyphenation character you will use (default = "002D)
+\defaulthyphenchar="002D
+
+% TeX \hyphenpenalty setting to 10000 which effectivly turns off
+% hyphenation.
+\hyphenpenalty=0
+
+% Like with \hyphenpenalty this will adjust TEX's ability to break
+% explicit hyphens.  These are words that occure in the text which
+% are spelled with a hyphen in them.  Normally, TeX will not touch
+% these unless this is set to a low number like -50. This setting
+% is active when useHyphenation is set to True. Default = 50
+\exhyphenpenalty=50
+
+% Pretolerance is an integer parameter that is used in TeX's line
+% breaking algorithm.  Use an integer from -1 to 10000.  If \pretolerance
+% is -1, then TeX bypasses the first attempt at breaking a paragraph
+% without hyphenation.  Normally it is always best to allow TeX to use
+% its defaults first so the setting here is 0 (zero) by default.
+\pretolerance=0
+
