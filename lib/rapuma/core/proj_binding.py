@@ -190,11 +190,19 @@ class ProjBinding (object) :
         # rendering. A segmentation fault may occur. This will cause the bind feature
         # to fail and gs will fail. There does not seem to be any way around this
         # as getting feedback from gs while processing is not possible, or at least
-        # not very easy. It will have to stay this way for now.
+        # not very easy. There is a debugging line below that can be substituted
+        # but results from that so far have not been useful. There may be
+        # issues with graphics not be sized right for /prepress output, also
+        # varying page sizes might affect it as well but at this time it is not
+        # certain why gs fails on certain data sets.
+        
+        # Use this command structure for normal useage:
         cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]
 
-        # If there issues with segmentation faults, the following should help with debugging
-        # cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-sOutputFile=' + tempFile]
+        # If there issues with segmentation faults, the following should help 
+        # with debugging. Adjust as needed. for more info go to:
+        #    http://ghostscript.com/doc/8.54/Use.htm#Debugging
+        # cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-sOutputFile=' + tempFile, '-dPDFWRDEBUG', '-E']; print cmd
 
         # Now add the files we want to bind together
         cmd = cmd + sourceList

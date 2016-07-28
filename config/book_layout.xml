@@ -384,6 +384,8 @@ Todo:
         <name>Text Elements</name>
         <sectionID>TextElements</sectionID>
         <description>General settings for text level elements</description>
+
+<!-- These settings are not implemented yet.
         <setting>
             <name>Justify Paragraphs</name>
             <description>Paragraphs are justified by default.  Set this to false to turn off justification.   Default = True</description>
@@ -398,6 +400,7 @@ Todo:
             <type>boolean</type>
             <value>False</value>
         </setting>
+-->
         <setting>
             <name>Body Text Font Size</name>
             <description>The size, in points, of the body text. Enter only an integer. Default = 10 points</description>

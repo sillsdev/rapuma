@@ -224,8 +224,8 @@ class ProjIllustration (object) :
                 if self.illustrationConfig[self.gid][i]['bid'] == cid :
                     if self.tools.str2bool(self.layoutConfig['DocumentFeatures']['useCaptionReferences']) \
                         and self.tools.str2bool(self.illustrationConfig[self.gid][i]['useThisCaptionRef']) :
-                        if obj['location'] :
-                            thisRef = obj['location']
+                        if obj['reference'] :
+                            thisRef = obj['reference']
                         else :
                             thisRef = obj['chapter'] + cvSep + obj['verse']
 
