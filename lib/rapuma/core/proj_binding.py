@@ -188,23 +188,32 @@ class ProjBinding (object) :
 
         # FIXME: Note/Warning, the use "-dPDFSETTINGS=/prepress" can cause an issue when
         # rendering. A segmentation fault may occur. This will cause the bind feature
-        # to fail and gs will fail. There does not seem to be any way around this
-        # as getting feedback from gs while processing is not possible, or at least
-        # not very easy. There is a debugging line below that can be substituted
-        # but results from that so far have not been useful. There may be
-        # issues with graphics not be sized right for /prepress output, also
-        # varying page sizes might affect it as well but at this time it is not
-        # certain why gs fails on certain data sets.
+        # to fail because gs failed. The segmentation fault seems to occure from graphics
+        # embedded in the PDF that are either too big or not a true grayscale, but rather
+        # RGB. The /prepress setting will then fail which means the doc will fail to test
+        # out right in PDF x1a tests.
         
-        # Use this command structure for normal useage:
-        cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]
+        # There does not seem to be any good way around this at this time. With more
+        # development time and perhaps better options, we might someday be able to get
+        # the bind process to be completely automated and be able to pass all Adobe tests
+        # for x1a and other issues. As there is not any real demand for Rapuma, it isn't
+        # worth putting any more effort into this section of code. Therefore, the
+        # /prepress setting will be dropped from here and the user will be required to
+        # Run any output through an Adobe product to get output that will be acceptable
+        # to Adobe. Adobe wins, I quite. :-(
+        
+        # This command structure was in production until the segmenation fault issue was found:
+        # cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-dPDFSETTINGS=/prepress', '-sOutputFile=' + tempFile]
 
-        # If there issues with segmentation faults, the following should help 
+        # For issues with segmentation faults, the following should help 
         # with debugging. Adjust as needed. for more info go to:
         #    http://ghostscript.com/doc/8.54/Use.htm#Debugging
         # cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-sOutputFile=' + tempFile, '-dPDFWRDEBUG', '-E']; print cmd
 
-        # Now add the files we want to bind together
+        # This is the non-x1a compatable command that will normally be used
+        cmd = ['gs', '-dBATCH', '-dNOPAUSE', '-q', '-sDEVICE=pdfwrite', '-sOutputFile=' + tempFile]
+
+        # Continueing on, now add the files we want to bind together
         cmd = cmd + sourceList
 
         # Now bind the files

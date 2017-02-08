@@ -67,7 +67,10 @@ class Tools (object) :
 #        import pdb; pdb.set_trace()
 
         pdfFile = tempfile.NamedTemporaryFile().name
-        cmd = ['rsvg-convert', '-f', 'pdf', '-o', pdfFile, svgFile]
+# Changing a couple output commands here to try to get this to output
+# gray scale, not RGB
+#        cmd = ['rsvg-convert', '-f', 'pdf', '-o', pdfFile, svgFile]
+        cmd = ['rsvg-convert', '-d 150', '-p 150', '-f', 'pdf', '-o', pdfFile, svgFile]
 
         # Simple try statement seems to work best for this
         try:
